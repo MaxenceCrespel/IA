@@ -200,19 +200,17 @@ const App: React.FC = () => {
     }
   };
 
-  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://votre-site.com')}&quote=${encodeURIComponent(text)}`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-
-  const [homeGoals, setHomeGoals] = useState<number | null>(null);
-  const [awayGoals, setAwayGoals] = useState<number | null>(null);
-  const [notifications, setNotifications] = useState<string[]>([]);
+  // LIGUE1 61
+  // LOSC 79
 
   const fetchLeagueData = async () => {
     const options = {
       method: 'GET',
-      url: 'https://api-football-v1.p.rapidapi.com/v3/fixtures',
-      params: { id: '1287700' },
+      url: 'https://api-football-v1.p.rapidapi.com/v3/standings',
+      params: {
+        league: '61',
+        season: '2024'
+      },
       headers: {
         'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
         'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
@@ -221,47 +219,58 @@ const App: React.FC = () => {
 
     try {
       const response = await axios.request(options);
-      const goals = response.data.response[0].goals;
-      const newHomeGoals = goals.home;
-      const newAwayGoals = goals.away;
-
-      // Vérifie si c'est le premier score récupéré
-      if (homeGoals === null && awayGoals === null) {
-        // Initialisation du score, sans notification
-        setHomeGoals(newHomeGoals);
-        setAwayGoals(newAwayGoals);
-      } else {
-        // Comparer les nouveaux scores avec les anciens pour déclencher les notifications
-        if (newHomeGoals > homeGoals!) {
-          setNotifications(prev => [...prev, `But de l'équipe à domicile! Score: ${newHomeGoals} - ${awayGoals}`]);
-          setHomeGoals(newHomeGoals);
-        }
-        else if (newAwayGoals > awayGoals!) {
-          setNotifications(prev => [...prev, `But de l'équipe à l'extérieur! Score: ${homeGoals} - ${newAwayGoals}`]);
-          setAwayGoals(newAwayGoals);
-        }
-        else {
-          console.log("Pas de buts");
-        }
-      }
+      console.log("League: ", response.data);
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
     }
   };
 
+  const fetchTeamData = async () => {
+    const options = {
+      method: 'GET',
+      url: 'https://api-football-v1.p.rapidapi.com/v3/teams',
+      params: {id: '79'},
+      headers: {
+        'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
+        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      console.log("Equipe: ", response.data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données de l\'équipe:', error);
+    }
+  };
+
+  const fetchFixtureData = async () => {
+    const options = {
+      method: 'GET',
+      url: 'https://api-football-v1.p.rapidapi.com/v3/fixtures',
+      params: {
+        season: '2024',
+        team: '79'
+      },
+      headers: {
+        'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
+        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      console.log("Matchs: ", response.data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données de l\'équipe:', error);
+    }
+  };
 
   useEffect(() => {
-    // Récupérer le score initial
+    fetchTeamData();
     fetchLeagueData();
-
-    // Définir un intervalle pour vérifier les scores toutes les 30 secondes
-    const intervalId = setInterval(() => {
-      fetchLeagueData();
-    }, 3000); // 3000 ms = 3 secondes
-
-    // Nettoyer l'intervalle lors du démontage du composant
-    return () => clearInterval(intervalId);
-  }, [homeGoals, awayGoals]);
+    fetchFixtureData();
+  }, []);
 
 
   return (
@@ -309,7 +318,7 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {text && (
+      {/* {text && (
         <div style={{ marginTop: '20px' }}>
           <h3>Partager sur :</h3>
           <FacebookShareButton
@@ -332,37 +341,7 @@ const App: React.FC = () => {
             <WhatsappIcon size={32} round />
           </WhatsappShareButton>
         </div>
-      )}
-      {text && (
-        <div style={{ marginTop: '20px' }}>
-          <h3>Partager sur :</h3>
-          <a href={facebookShareUrl} target="_blank" rel="noopener noreferrer">
-            Facebook
-          </a>
-          <br />
-          <a href={twitterShareUrl} target="_blank" rel="noopener noreferrer">
-            Twitter
-          </a>
-          <br />
-          <a href={whatsappShareUrl} target="_blank" rel="noopener noreferrer">
-            WhatsApp
-          </a>
-        </div>
-      )}
-      <div style={{ padding: '20px' }}>
-        <h1>Notifications de Buts en Direct</h1>
-        <div>
-          <h2>Score: {homeGoals !== null && awayGoals !== null ? `${homeGoals} - ${awayGoals}` : 'Chargement...'}</h2>
-        </div>
-        <div>
-          <h3>Notifications:</h3>
-          <ul>
-            {notifications.map((notification, index) => (
-              <li key={index}>{notification}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      )} */}
     </div>
   );
 };
