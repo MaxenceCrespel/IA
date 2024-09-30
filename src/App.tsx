@@ -1,47 +1,61 @@
 import React, { useState } from 'react';
 import { generateText } from './OpenAI';
+import {
+  FacebookShareButton,
+  TwitterShareButton,
+  WhatsappShareButton,
+  FacebookIcon,
+  TwitterIcon,
+  WhatsappIcon,
+} from 'react-share';
+import axios from 'axios';
+import { useEffect } from 'react';
 
 // Exemple de fausse base de données pour le Club de Futsal d'Avion
 const fakeDatabase = {
   matches: [
     {
       type: 'past',
-      equipeA: 'Club de Futsal d\'Avion',
+      equipeA: 'Avion Futsal',
       equipeB: 'Kingherseim FC',
-      lieu: 'Salle de Futsal d\'Avion',
+      lieu: 'Salle Blezel',
+      date: '10/09/2024',
       heure: '17:00',
-      club: 'Club de Futsal d\'Avion',
+      club: 'Avion Futsal',
       score: '5 - 2',
     },
     {
       type: 'current',
-      equipeA: 'Club de Futsal d\'Avion',
-      equipeB: 'Goal Futsal Club',
-      lieu: 'Salle de Futsal d\'Avion',
+      equipeA: 'Goal Futsal Club',
+      equipeB: 'Avion Futsal',
+      lieu: 'SALLE JEANNE TROUILLET',
+      date: '30/09/2024',
       heure: '19:00',
-      club: 'Club de Futsal d\'Avion',
-      score: '3 - 1', // Score actuel
+      club: 'Avion Futsal',
+      score: '3 - 1',
     },
     {
       type: 'upcoming',
-      equipeA: 'Club de Futsal d\'Avion',
+      equipeA: 'Avion Futsal',
       equipeB: 'Toulon Elite Futsal',
-      lieu: 'Salle de Futsal d\'Avion',
+      lieu: 'Salle Blezel',
+      date: '12/10/2024',
       heure: '20:00',
-      club: 'Club de Futsal d\'Avion',
+      club: 'Avion Futsal',
       score: '',
     }
   ],
   classement: [
-    { position: 1, equipe: 'Club de Futsal d\'Avion', points: 25 },
-    { position: 2, equipe: 'Toulon Elite Futsal', points: 20 },
-    { position: 3, equipe: 'Goal Futsal Club', points: 18 },
+    { position: 1, equipe: 'Avion Futsal', points: 25 },
+    { position: 2, equipe: 'Toulon Elite Futsal', points: 24 },
+    { position: 3, equipe: 'Goal Futsal Club', points: 23 },
     { position: 4, equipe: 'Kingherseim FC', points: 15 },
     { position: 5, equipe: 'Herouville Futsal', points: 10 },
   ],
   club: {
     name: "Avion Futsal",
-    lieu: "Salle Blezel"
+    lieu: "Salle Blezel",
+    couleur: "noir et blanc",
   }
 };
 
@@ -50,12 +64,12 @@ const contentTypes = [
   {
     id: 1,
     label: 'Annonce Match',
-    prompt: 'En tant que responsable de la communication du Club de Futsal d\'Avion, rédige une annonce passionnante pour le match à venir entre {equipeA} et {equipeB}. Mentionne le lieu à {lieu} à {heure}, et utilise un ton engageant pour motiver les supporters à venir encourager leur équipe.'
+    prompt: 'En tant que responsable de la communication de {clubName}, rédige une annonce passionnante pour le match à venir entre {equipeA} et {equipeB}. Mentionne le lieu à {lieu} à {heure} le {date}, et utilise un ton engageant pour motiver les supporters à venir encourager leur équipe. Prends en compte la position de {equipeA} est en {positionA} position avec {pointsA} et {equipeB}, qui est en {positionB} position avec {pointsB} points. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 2,
     label: 'Score en Direct',
-    prompt: 'Écris un message percutant pour annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l\'auditoire!'
+    prompt: 'En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour clubName pour annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l\'auditoire! Adapte le texte en fonction de si {clubName} est entrain de gagner ou perdre.  Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Nombre de caractères maximum : 500.'
   },
   {
     id: 3,
@@ -104,6 +118,17 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedContentType, setSelectedContentType] = useState(contentTypes[0]);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl); // Pour l'aperçu de l'image
+    }
+  };
 
   const handleGenerateText = async () => {
     setLoading(true);
@@ -134,6 +159,20 @@ const App: React.FC = () => {
       const positionA = fakeDatabase.classement.findIndex(equipe => equipe.equipe === match.equipeA) + 1;
       const positionB = fakeDatabase.classement.findIndex(equipe => equipe.equipe === match.equipeB) + 1;
 
+      const [scoreA, scoreB] = match.score.split(' - ').map(Number);
+      const clubScore = match.club === match.equipeA ? scoreA : scoreB;
+      const opponentScore = match.club === match.equipeA ? scoreB : scoreA;
+
+      // Adaptation du prompt en fonction de qui gagne
+      let matchStatus = '';
+      if (clubScore > opponentScore) {
+        matchStatus = 'est actuellement en train de gagner !';
+      } else if (clubScore < opponentScore) {
+        matchStatus = 'est actuellement en train de perdre...';
+      } else {
+        matchStatus = 'est à égalité.';
+      }
+
       // Remplacez les valeurs dans le prompt
       prompt = prompt
         .replace(/{score}/g, match.score || 'N/A')
@@ -144,8 +183,11 @@ const App: React.FC = () => {
         .replace(/{positionA}/g, positionA.toString())
         .replace(/{positionB}/g, positionB.toString())
         .replace(/{lieu}/g, match.lieu)
+        .replace(/{date}/g, match.date)
         .replace(/{heure}/g, match.heure)
-        .replace(/{club}/g, fakeDatabase.club.name);
+        .replace(/{clubName}/g, fakeDatabase.club.name)
+        .replace(/clubColors/g, fakeDatabase.club.couleur)
+        .replace(/{matchStatus}/g, matchStatus);
     }
 
     try {
@@ -157,6 +199,70 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://votre-site.com')}&quote=${encodeURIComponent(text)}`;
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+
+  const [homeGoals, setHomeGoals] = useState<number | null>(null);
+  const [awayGoals, setAwayGoals] = useState<number | null>(null);
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  const fetchLeagueData = async () => {
+    const options = {
+      method: 'GET',
+      url: 'https://api-football-v1.p.rapidapi.com/v3/fixtures',
+      params: { id: '1287700' },
+      headers: {
+        'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
+        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      const goals = response.data.response[0].goals;
+      const newHomeGoals = goals.home;
+      const newAwayGoals = goals.away;
+
+      // Vérifie si c'est le premier score récupéré
+      if (homeGoals === null && awayGoals === null) {
+        // Initialisation du score, sans notification
+        setHomeGoals(newHomeGoals);
+        setAwayGoals(newAwayGoals);
+      } else {
+        // Comparer les nouveaux scores avec les anciens pour déclencher les notifications
+        if (newHomeGoals > homeGoals!) {
+          setNotifications(prev => [...prev, `But de l'équipe à domicile! Score: ${newHomeGoals} - ${awayGoals}`]);
+          setHomeGoals(newHomeGoals);
+        }
+        else if (newAwayGoals > awayGoals!) {
+          setNotifications(prev => [...prev, `But de l'équipe à l'extérieur! Score: ${homeGoals} - ${newAwayGoals}`]);
+          setAwayGoals(newAwayGoals);
+        }
+        else {
+          console.log("Pas de buts");
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    // Récupérer le score initial
+    fetchLeagueData();
+
+    // Définir un intervalle pour vérifier les scores toutes les 30 secondes
+    const intervalId = setInterval(() => {
+      fetchLeagueData();
+    }, 3000); // 3000 ms = 3 secondes
+
+    // Nettoyer l'intervalle lors du démontage du composant
+    return () => clearInterval(intervalId);
+  }, [homeGoals, awayGoals]);
+
 
   return (
     <div style={{ padding: '20px' }}>
@@ -182,7 +288,12 @@ const App: React.FC = () => {
         </select>
       </div>
 
-      <button onClick={handleGenerateText} disabled={loading}>
+      <div style={{ marginTop: '20px' }}>
+        <label htmlFor="image-upload">Ajouter une image :</label>
+        <input type="file" id="image-upload" onChange={handleImageUpload} />
+      </div>
+
+      <button onClick={handleGenerateText} disabled={loading} style={{ marginTop: '20px' }}>
         {loading ? 'Génération en cours...' : 'Générer le texte'}
       </button>
 
@@ -190,6 +301,67 @@ const App: React.FC = () => {
       <div style={{ marginTop: '20px' }}>
         <h2>Texte généré :</h2>
         <p>{text}</p>
+        {imagePreview && (
+          <div style={{ marginTop: '10px' }}>
+            <h3>Image incluse :</h3>
+            <img src={imagePreview} alt="Image pour le partage" style={{ maxWidth: '100%', height: 'auto' }} />
+          </div>
+        )}
+      </div>
+
+      {text && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>Partager sur :</h3>
+          <FacebookShareButton
+            url={window.location.href}
+            hashtag="#Futsal"
+          >
+            <FacebookIcon size={32} round />
+          </FacebookShareButton>
+          <TwitterShareButton
+            url={window.location.href}
+            title={text}
+            hashtags={["Futsal"]}
+          >
+            <TwitterIcon size={32} round />
+          </TwitterShareButton>
+          <WhatsappShareButton
+            url={window.location.href}
+            title={text}
+          >
+            <WhatsappIcon size={32} round />
+          </WhatsappShareButton>
+        </div>
+      )}
+      {text && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>Partager sur :</h3>
+          <a href={facebookShareUrl} target="_blank" rel="noopener noreferrer">
+            Facebook
+          </a>
+          <br />
+          <a href={twitterShareUrl} target="_blank" rel="noopener noreferrer">
+            Twitter
+          </a>
+          <br />
+          <a href={whatsappShareUrl} target="_blank" rel="noopener noreferrer">
+            WhatsApp
+          </a>
+        </div>
+      )}
+      <div style={{ padding: '20px' }}>
+        <h1>Notifications de Buts en Direct</h1>
+        <div>
+          <h2>Score: {homeGoals !== null && awayGoals !== null ? `${homeGoals} - ${awayGoals}` : 'Chargement...'}</h2>
+        </div>
+        <div>
+          <h3>Notifications:</h3>
+          <ul>
+            {notifications.map((notification, index) => (
+              <li key={index}>{notification}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
