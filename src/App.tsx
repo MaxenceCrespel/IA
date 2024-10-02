@@ -104,7 +104,7 @@ const contentTypes = [
   {
     id: 9,
     label: 'Débrief du Match',
-    prompt: 'Rédige un débrief complet du dernier match de {clubName}, où ils ont battu {equipeB} avec un score de {score}. Discute de la manière dont cette victoire a influencé le classement et a permis à {clubName} de maintenir sa position de leader avec {pointsA} points, tandis que {equipeB} est à {pointsB} points. Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
+    prompt: 'Rédige un débrief complet du dernier match de {clubName}, {equipeA} contre {equipeB} avec un score de {score}. Discute de la manière dont cette victoire a influencé le classement et a permis à {clubName} de maintenir sa position de leader avec {pointsA} points, tandis que {equipeB} est à {pointsB} points. Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
   },
   {
     id: 10,
@@ -130,6 +130,11 @@ const App: React.FC = () => {
     }
   };
 
+  const parseDateDDMMYYYY = (dateStr: string): Date => {
+    const [day, month, year] = dateStr.split('/').map(Number);
+    return new Date(year, month - 1, day); // Month is zero-indexed
+  };
+
   const handleGenerateText = async () => {
     setLoading(true);
     setError(null);
@@ -149,6 +154,27 @@ const App: React.FC = () => {
       if (selectedContentType.id === 9) return m.type === 'past';
       return false;
     });
+    if(selectedContentType.id ===9){
+// select all the match past and sort it by date
+
+      let matches = fakeDatabase.matches.filter(elt=> elt.type === "past").sort((a, b) => {
+        const dateA = parseDateDDMMYYYY(a.date);
+        const dateB = parseDateDDMMYYYY(b.date);
+        return dateA.getTime() - dateB.getTime(); // Ascending order
+      });
+// get the last match 
+      const lastMatch = matches[matches.length-1];
+      if (match){
+        match.date = lastMatch.date;
+        match.equipeA = lastMatch.equipeA;
+        match.equipeB = lastMatch.equipeB;
+        match.heure = lastMatch.equipeB;
+        match.lieu = lastMatch.lieu;
+        match.score = lastMatch.score;
+        match.type = match.type;
+      }
+      
+    }
 
     if (match) {
       // Obtenez les points des équipes
@@ -172,9 +198,6 @@ const App: React.FC = () => {
       } else {
         matchStatus = 'est à égalité.';
       }
-      console.log("Before generation")
-      console.log(fakeDatabase);
-      console.log("prompt",match.club)
       // Remplacez les valeurs dans le prompt
       prompt = prompt
         .replace(/{score}/g, match.score || 'N/A')
@@ -188,7 +211,6 @@ const App: React.FC = () => {
         .replace(/{date}/g, match.date)
         .replace(/{heure}/g, match.heure)
         .replace(/{clubName}/g, match.club)
-        .replace(/{club}/g,match.club)
         .replace(/clubColors/g, fakeDatabase.club.couleur)
         .replace(/{matchStatus}/g, matchStatus);
     }
@@ -243,6 +265,7 @@ const App: React.FC = () => {
     try {
       const response = await axios.request(options);
       console.log("Equipe: ", response.data);
+      return response.data.response[0].team.name
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
@@ -287,6 +310,8 @@ const App: React.FC = () => {
     };
 
     try {
+      const team = await fetchTeamData();
+      console.log("team",team)
       const response = await axios.request(options);
       console.log("Matchs: ", response.data);
       const datas = response.data.response;
@@ -301,12 +326,10 @@ const App: React.FC = () => {
         tmp["equipeB"] = datas[elt].teams.away.name
         tmp["score"] = String(datas[elt].goals.home)+" - "+String(datas[elt].goals.away)
         tmp["lieu"] = datas[elt].fixture.venue.name
-        tmp["club"] = datas[elt].league.name
+        tmp["club"] = team
         data.push(tmp);
-        clubs.add(datas[elt].league.name);
       }
       fakeDatabase.matches = data;
-      console.log("clubs", clubs)
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
@@ -314,7 +337,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchTeamData();
-    fetchLeagueData();
+    //fetchLeagueData();
     fetchFixtureData();
   }, []);
 
