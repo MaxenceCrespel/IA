@@ -55,7 +55,7 @@ const fakeDatabase = {
   club: {
     name: "Avion Futsal",
     lieu: "Salle Blezel",
-    couleur: "noir et blanc",
+    couleur: "rouge et blanc",
   }
 };
 
@@ -104,7 +104,7 @@ const contentTypes = [
   {
     id: 9,
     label: 'Débrief du Match',
-    prompt: 'Rédige un débrief complet du dernier match de {club}, où ils ont battu {equipeB} avec un score de {score}. Discute de la manière dont cette victoire a influencé le classement et a permis à {club} de maintenir sa position de leader avec {pointsA} points, tandis que {equipeB} est à {pointsB} points. Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
+    prompt: 'Rédige un débrief complet du dernier match de {clubName}, où ils ont battu {equipeB} avec un score de {score}. Discute de la manière dont cette victoire a influencé le classement et a permis à {clubName} de maintenir sa position de leader avec {pointsA} points, tandis que {equipeB} est à {pointsB} points. Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
   },
   {
     id: 10,
@@ -172,7 +172,9 @@ const App: React.FC = () => {
       } else {
         matchStatus = 'est à égalité.';
       }
-
+      console.log("Before generation")
+      console.log(fakeDatabase);
+      console.log("prompt",match.club)
       // Remplacez les valeurs dans le prompt
       prompt = prompt
         .replace(/{score}/g, match.score || 'N/A')
@@ -185,10 +187,12 @@ const App: React.FC = () => {
         .replace(/{lieu}/g, match.lieu)
         .replace(/{date}/g, match.date)
         .replace(/{heure}/g, match.heure)
-        .replace(/{clubName}/g, fakeDatabase.club.name)
+        .replace(/{clubName}/g, match.club)
+        .replace(/{club}/g,match.club)
         .replace(/clubColors/g, fakeDatabase.club.couleur)
         .replace(/{matchStatus}/g, matchStatus);
     }
+    console.log("prompt after:",prompt)
 
     try {
       const generatedText = await generateText(prompt);
@@ -243,7 +247,31 @@ const App: React.FC = () => {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
   };
+  let data:any[] = []
+  let clubs:Set<string> = new Set<string>()
 
+  function checkEventStatus(dateString: string): string {
+    // Create a Date object from the input string
+    const eventDate = new Date(dateString);
+    const now = new Date();
+  
+    // Calculate the difference in milliseconds
+    const difference = eventDate.getTime() - now.getTime();
+    const ninetyMinutesInMilliseconds = 90 * 60 * 1000;
+  
+    if (difference < -ninetyMinutesInMilliseconds) {
+      // Event is already past and has exceeded 90 minutes
+      return "past";
+    } else if (difference >= -ninetyMinutesInMilliseconds && difference <= 0) {
+      // Event is current (within the last 90 minutes or exactly now)
+      return "current";
+    } else {
+      // Event is upcoming
+      return "upcoming";
+    }
+  }
+  
+  
   const fetchFixtureData = async () => {
     const options = {
       method: 'GET',
@@ -261,6 +289,24 @@ const App: React.FC = () => {
     try {
       const response = await axios.request(options);
       console.log("Matchs: ", response.data);
+      const datas = response.data.response;
+      for(const elt in datas){
+        let tmp: Record<string, string> = {};
+        const date = datas[elt].fixture.date;
+        const dateObj = new Date(date);
+        tmp["date"] =  `${dateObj.getUTCDate().toString().padStart(2, '0')}/${(dateObj.getUTCMonth() + 1).toString().padStart(2, '0')}/${dateObj.getUTCFullYear()}`;
+        tmp["heure"]= `${dateObj.getUTCHours().toString().padStart(2, '0')}:${dateObj.getUTCMinutes().toString().padStart(2, '0')}`;
+        tmp["type"] = checkEventStatus(date);
+        tmp["equipeA"] = datas[elt].teams.home.name
+        tmp["equipeB"] = datas[elt].teams.away.name
+        tmp["score"] = String(datas[elt].goals.home)+" - "+String(datas[elt].goals.away)
+        tmp["lieu"] = datas[elt].fixture.venue.name
+        tmp["club"] = datas[elt].league.name
+        data.push(tmp);
+        clubs.add(datas[elt].league.name);
+      }
+      fakeDatabase.matches = data;
+      console.log("clubs", clubs)
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
@@ -271,7 +317,6 @@ const App: React.FC = () => {
     fetchLeagueData();
     fetchFixtureData();
   }, []);
-
 
   return (
     <div style={{ padding: '20px' }}>
