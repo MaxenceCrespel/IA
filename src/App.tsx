@@ -194,19 +194,11 @@ const App: React.FC = () => {
         if (match.league === key)  
             league = value;
       })
-      console.log("entrée dans le if match")
 
-      // if(match.league === "Ligue 1") classment = fakeDatabase.classement[1];
-      // else if(match.league === "UEFA Champions League") classment = fakeDatabase.classement[2];
-      // else classment = fakeDatabase.classement[0];
-      // console.log("match.league",match?.league)
-      console.log("league",league)
       for (let elt in fakeDatabase.classement){
-        if(fakeDatabase.classement[elt][0].league){
-        if(league === fakeDatabase.classement[elt][0].league) {
-          console.log("fakedtabase_classement",fakeDatabase.classement[elt][0].league)
-          classment = fakeDatabase.classement[elt];
-          }
+        if(fakeDatabase.classement[elt].length > 0){
+        if(league === fakeDatabase.classement[elt][0].league) classment = fakeDatabase.classement[elt];
+
         } 
       }
       // Obtenez les points des équipes
