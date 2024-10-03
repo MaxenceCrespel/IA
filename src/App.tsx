@@ -172,6 +172,7 @@ const App: React.FC = () => {
       });
 // get the last match 
       const lastMatch = matches[matches.length-1];
+      console.log("last_match",match)
       if (match){
         match.date = lastMatch.date;
         match.equipeA = lastMatch.equipeA;
@@ -179,7 +180,8 @@ const App: React.FC = () => {
         match.heure = lastMatch.equipeB;
         match.lieu = lastMatch.lieu;
         match.score = lastMatch.score;
-        match.type = match.type;
+        match.type = lastMatch.type;
+        match.league = lastMatch.league;
       }
       
     }
@@ -189,18 +191,13 @@ const App: React.FC = () => {
     if (match) {
       let classment:any[] = [];
 // récupérer la ligue du match pour pouvoir récupérer le classement plus tard
-      let league = "";
-      fakeDatabase.league.forEach((value,key)=>{
-        if (match.league === key)  
-            league = value;
-      })
-
+      
       for (let elt in fakeDatabase.classement){
         if(fakeDatabase.classement[elt].length > 0){
-        if(league === fakeDatabase.classement[elt][0].league) classment = fakeDatabase.classement[elt];
-
+          if(match.league === Number(fakeDatabase.classement[elt][0].league)) classment = fakeDatabase.classement[elt];
         } 
       }
+      console.log("classment",classment)
       // Obtenez les points des équipes
       const pointsA = classment.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
       const pointsB = classment.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
@@ -276,8 +273,8 @@ const App: React.FC = () => {
 
     try {
       const response = await axios.request(options);
-      console.log("League: ", response.data.response[0].league.standings[0]);
-      return response.data.response[0].league.standings[0];
+      console.log("League: ", response.data);
+      return response.data.response[0].league;
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
     }
@@ -297,7 +294,7 @@ const App: React.FC = () => {
     try {
       const response = await axios.request(options);
       console.log("Equipe: ", response.data);
-      return response.data.response[0].team.name
+      return response.data.response[0].team.name;
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
@@ -344,7 +341,7 @@ const App: React.FC = () => {
       const team = await fetchTeamData();
       const response = await axios.request(options);
       const datas = response.data.response;
-      //console.log("datas",datas)
+      console.log("datas",response.data)
       for(const elt in datas){
         let tmp: Record<string, string> = {};
         const date = datas[elt].fixture.date;
@@ -365,24 +362,28 @@ const App: React.FC = () => {
       fakeDatabase.matches = data;
       let classes:any[] = [];
       const leagues = Array.from(fakeDatabase.league.entries());
+      //console.log("leagues_array",leagues)
       for (const value of leagues){
         const classement = await fetchLeagueData(String(value[0]));
-        console.log("classement",classement)
+        //console.log("classement",classement)
         let ranking : any[] = [];
-        for (let elt in classement){
-          let tmp: Record<string, string> = {};
-          //console.log("elt",classement[elt])
-          tmp["position"] = classement[elt].rank;
-          tmp["equipe"] = classement[elt].team.name;
-          tmp["points"] = classement[elt].points;
-          tmp["league"] = classement[elt].group;
-          ranking.push(tmp);
+        if (classement){
+          for (let elt of classement.standings[0]){
+            //console.log("element",elt)
+            let tmp: Record<string, string> = {};
+            //console.log("elt",classement[elt])
+            tmp["position"] = elt.rank;
+            tmp["equipe"] = elt.team.name;
+            tmp["points"] = elt.points;
+            tmp["league"] = classement.id;
+            ranking.push(tmp);
+          }
         }
         classes.push(ranking);
       }
       
       fakeDatabase.classement = classes;
-      console.log("fakedatabase",fakeDatabase)
+      //console.log("fakedatabase",fakeDatabase)
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
