@@ -46,23 +46,25 @@ const fakeDatabase = {
       heure: '20:00',
       club: 'Avion Futsal',
       score: '',
-      league:1, 
+      league: 1, 
     }
   ],
   classement: [
     [
-          { position: 1, equipe: 'Avion Futsal', points: 25 },
-          { position: 2, equipe: 'Toulon Elite Futsal', points: 24 },
-          { position: 3, equipe: 'Goal Futsal Club', points: 23 },
-          {position: 4, equipe: 'Kingherseim FC', points: 15 },
-          { position: 5, equipe: 'Herouville Futsal', points: 10 }
+          { position: 1, equipe: 'Avion Futsal', points: 25 ,league:"Ligue 1"},
+          { position: 2, equipe: 'Toulon Elite Futsal', points: 24 ,league:"Ligue 1"},
+          { position: 3, equipe: 'Goal Futsal Club', points: 23,league:"Ligue 1" },
+          {position: 4, equipe: 'Kingherseim FC', points: 15 ,league:"test"},
+          { position: 5, equipe: 'Herouville Futsal', points: 10 ,league:"test"}
     ]
   ],
   club: {
     name: "Lille",
     lieu: "Salle Blezel",
     couleur: "rouge et blanc",
-  }
+  },
+// pour enregistrer l'id de chaque ligue avec sa valeur
+  league: new Map<number,string>()
 };
 
 // Liste des types de contenu
@@ -185,9 +187,28 @@ const App: React.FC = () => {
     console.log("match",match?.league)
 
     if (match) {
-      let classment:any[] = []
-      if(match.league === 61) classment = fakeDatabase.classement[1];
-      else if(match.league === 667) classment = fakeDatabase.classement[2];
+      let classment:any[] = [];
+// récupérer la ligue du match pour pouvoir récupérer le classement plus tard
+      let league = "";
+      fakeDatabase.league.forEach((value,key)=>{
+        if (match.league === key)  
+            league = value;
+      })
+      console.log("entrée dans le if match")
+
+      // if(match.league === "Ligue 1") classment = fakeDatabase.classement[1];
+      // else if(match.league === "UEFA Champions League") classment = fakeDatabase.classement[2];
+      // else classment = fakeDatabase.classement[0];
+      // console.log("match.league",match?.league)
+      console.log("league",league)
+      for (let elt in fakeDatabase.classement){
+        if(fakeDatabase.classement[elt][0].league){
+        if(league === fakeDatabase.classement[elt][0].league) {
+          console.log("fakedtabase_classement",fakeDatabase.classement[elt][0].league)
+          classment = fakeDatabase.classement[elt];
+          }
+        } 
+      }
       // Obtenez les points des équipes
       const pointsA = classment.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
       const pointsB = classment.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
@@ -290,7 +311,6 @@ const App: React.FC = () => {
     }
   };
   let data:any[] = []
-  let clubs:Set<string> = new Set<string>()
 
   function checkEventStatus(dateString: string): string {
     // Create a Date object from the input string
@@ -332,7 +352,7 @@ const App: React.FC = () => {
       const team = await fetchTeamData();
       const response = await axios.request(options);
       const datas = response.data.response;
-      let club = new Set<number>();
+      //console.log("datas",datas)
       for(const elt in datas){
         let tmp: Record<string, string> = {};
         const date = datas[elt].fixture.date;
@@ -346,30 +366,31 @@ const App: React.FC = () => {
         tmp["lieu"] = datas[elt].fixture.venue.name;
         tmp["club"] = team;
         tmp["league"] = datas[elt].league.id;
+        //console.log("tmp",tmp)
         data.push(tmp);
-        club.add(datas[elt].league.id)
+        fakeDatabase.league.set(datas[elt].league.id,datas[elt].league.name);
       }
       fakeDatabase.matches = data;
       let classes:any[] = [];
-      const leagues = Array.from(club);
+      const leagues = Array.from(fakeDatabase.league.entries());
       for (const value of leagues){
-        const classement = await fetchLeagueData(String(value));
+        const classement = await fetchLeagueData(String(value[0]));
+        console.log("classement",classement)
         let ranking : any[] = [];
         for (let elt in classement){
           let tmp: Record<string, string> = {};
-          console.log("elt",classement[elt])
+          //console.log("elt",classement[elt])
           tmp["position"] = classement[elt].rank;
           tmp["equipe"] = classement[elt].team.name;
           tmp["points"] = classement[elt].points;
           tmp["league"] = classement[elt].group;
-          tmp["id_league"] = classement
           ranking.push(tmp);
         }
         classes.push(ranking);
       }
       
       fakeDatabase.classement = classes;
-      console.log("fakedatabase",classes)
+      console.log("fakedatabase",fakeDatabase)
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
