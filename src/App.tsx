@@ -10,6 +10,7 @@ import {
 } from 'react-share';
 import axios from 'axios';
 import { useEffect } from 'react';
+import { match } from 'assert';
 
 // Exemple de fausse base de données pour le Club de Futsal d'Avion
 const fakeDatabase = {
@@ -23,6 +24,7 @@ const fakeDatabase = {
       heure: '17:00',
       club: 'Avion Futsal',
       score: '5 - 2',
+      league: 1,
     },
     {
       type: 'current',
@@ -33,6 +35,7 @@ const fakeDatabase = {
       heure: '19:00',
       club: 'Avion Futsal',
       score: '3 - 1',
+      league: 1,
     },
     {
       type: 'upcoming',
@@ -43,17 +46,20 @@ const fakeDatabase = {
       heure: '20:00',
       club: 'Avion Futsal',
       score: '',
+      league:1, 
     }
   ],
   classement: [
-    { position: 1, equipe: 'Avion Futsal', points: 25 },
-    { position: 2, equipe: 'Toulon Elite Futsal', points: 24 },
-    { position: 3, equipe: 'Goal Futsal Club', points: 23 },
-    { position: 4, equipe: 'Kingherseim FC', points: 15 },
-    { position: 5, equipe: 'Herouville Futsal', points: 10 },
+    [
+          { position: 1, equipe: 'Avion Futsal', points: 25 },
+          { position: 2, equipe: 'Toulon Elite Futsal', points: 24 },
+          { position: 3, equipe: 'Goal Futsal Club', points: 23 },
+          {position: 4, equipe: 'Kingherseim FC', points: 15 },
+          { position: 5, equipe: 'Herouville Futsal', points: 10 }
+    ]
   ],
   club: {
-    name: "Avion Futsal",
+    name: "Lille",
     lieu: "Salle Blezel",
     couleur: "rouge et blanc",
   }
@@ -104,7 +110,7 @@ const contentTypes = [
   {
     id: 9,
     label: 'Débrief du Match',
-    prompt: 'Rédige un débrief complet du dernier match de {clubName}, {equipeA} contre {equipeB} avec un score de {score}. Discute de la manière dont cette victoire a influencé le classement et a permis à {clubName} de maintenir sa position de leader avec {pointsA} points, tandis que {equipeB} est à {pointsB} points. Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
+    prompt: 'Rédige un débrief complet du dernier match de {clubName}, {equipeA} contre {equipeB} avec un score de {score}. Discute du classement de {clubName} avec les statistiques ci-après: le classement est comme suit {equipeA} est à la {positionA} avec {pointsA} points position et {equipeB} est à la {positionB} avec {pointsB} points . Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
   },
   {
     id: 10,
@@ -175,15 +181,20 @@ const App: React.FC = () => {
       }
       
     }
+//get classement
+    console.log("match",match?.league)
 
     if (match) {
+      let classment:any[] = []
+      if(match.league === 61) classment = fakeDatabase.classement[1];
+      else if(match.league === 667) classment = fakeDatabase.classement[2];
       // Obtenez les points des équipes
-      const pointsA = fakeDatabase.classement.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
-      const pointsB = fakeDatabase.classement.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
+      const pointsA = classment.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
+      const pointsB = classment.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
 
       // Obtenez les positions des équipes
-      const positionA = fakeDatabase.classement.findIndex(equipe => equipe.equipe === match.equipeA) + 1;
-      const positionB = fakeDatabase.classement.findIndex(equipe => equipe.equipe === match.equipeB) + 1;
+      const positionA = classment.findIndex(equipe => equipe.equipe === match.equipeA) + 1;
+      const positionB = classment.findIndex(equipe => equipe.equipe === match.equipeB) + 1;
 
       const [scoreA, scoreB] = match.score.split(' - ').map(Number);
       const clubScore = match.club === match.equipeA ? scoreA : scoreB;
@@ -197,6 +208,12 @@ const App: React.FC = () => {
         matchStatus = 'est actuellement en train de perdre...';
       } else {
         matchStatus = 'est à égalité.';
+      }
+// recupérer les positions des deux équipes
+      let positions: Record<string,string> = {} 
+      for (let elt in classment){
+        if(classment[elt].equipe === match.equipeA) positions["equipeA"] = String(classment[elt].position);
+        else if(classment[elt].equipe === match.equipeB) positions["equipeB"] = String(classment[elt].position);
       }
       // Remplacez les valeurs dans le prompt
       prompt = prompt
@@ -212,9 +229,10 @@ const App: React.FC = () => {
         .replace(/{heure}/g, match.heure)
         .replace(/{clubName}/g, match.club)
         .replace(/clubColors/g, fakeDatabase.club.couleur)
-        .replace(/{matchStatus}/g, matchStatus);
+        .replace(/{matchStatus}/g, matchStatus)
+        .replace(/{positionA}/g,positions.equipeA)
+        .replace(/{positionB}/g,positions.equipeB)
     }
-    console.log("prompt after:",prompt)
 
     try {
       const generatedText = await generateText(prompt);
@@ -229,12 +247,12 @@ const App: React.FC = () => {
   // LIGUE1 61
   // LOSC 79
 
-  const fetchLeagueData = async () => {
+  const fetchLeagueData = async (id:string) => {
     const options = {
       method: 'GET',
       url: 'https://api-football-v1.p.rapidapi.com/v3/standings',
       params: {
-        league: '61',
+        league: id,
         season: '2024'
       },
       headers: {
@@ -245,7 +263,8 @@ const App: React.FC = () => {
 
     try {
       const response = await axios.request(options);
-      console.log("League: ", response.data);
+      console.log("League: ", response.data.response[0].league.standings[0]);
+      return response.data.response[0].league.standings[0];
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
     }
@@ -311,10 +330,9 @@ const App: React.FC = () => {
 
     try {
       const team = await fetchTeamData();
-      console.log("team",team)
       const response = await axios.request(options);
-      console.log("Matchs: ", response.data);
       const datas = response.data.response;
+      let club = new Set<number>();
       for(const elt in datas){
         let tmp: Record<string, string> = {};
         const date = datas[elt].fixture.date;
@@ -322,21 +340,43 @@ const App: React.FC = () => {
         tmp["date"] =  `${dateObj.getUTCDate().toString().padStart(2, '0')}/${(dateObj.getUTCMonth() + 1).toString().padStart(2, '0')}/${dateObj.getUTCFullYear()}`;
         tmp["heure"]= `${dateObj.getUTCHours().toString().padStart(2, '0')}:${dateObj.getUTCMinutes().toString().padStart(2, '0')}`;
         tmp["type"] = checkEventStatus(date);
-        tmp["equipeA"] = datas[elt].teams.home.name
-        tmp["equipeB"] = datas[elt].teams.away.name
-        tmp["score"] = String(datas[elt].goals.home)+" - "+String(datas[elt].goals.away)
-        tmp["lieu"] = datas[elt].fixture.venue.name
-        tmp["club"] = team
+        tmp["equipeA"] = datas[elt].teams.home.name;
+        tmp["equipeB"] = datas[elt].teams.away.name;
+        tmp["score"] = String(datas[elt].goals.home)+" - "+String(datas[elt].goals.away);
+        tmp["lieu"] = datas[elt].fixture.venue.name;
+        tmp["club"] = team;
+        tmp["league"] = datas[elt].league.id;
         data.push(tmp);
+        club.add(datas[elt].league.id)
       }
       fakeDatabase.matches = data;
+      let classes:any[] = [];
+      const leagues = Array.from(club);
+      for (const value of leagues){
+        const classement = await fetchLeagueData(String(value));
+        let ranking : any[] = [];
+        for (let elt in classement){
+          let tmp: Record<string, string> = {};
+          console.log("elt",classement[elt])
+          tmp["position"] = classement[elt].rank;
+          tmp["equipe"] = classement[elt].team.name;
+          tmp["points"] = classement[elt].points;
+          tmp["league"] = classement[elt].group;
+          tmp["id_league"] = classement
+          ranking.push(tmp);
+        }
+        classes.push(ranking);
+      }
+      
+      fakeDatabase.classement = classes;
+      console.log("fakedatabase",classes)
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
   };
 
   useEffect(() => {
-    fetchTeamData();
+    //fetchTeamData();
     //fetchLeagueData();
     fetchFixtureData();
   }, []);
