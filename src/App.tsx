@@ -10,6 +10,7 @@ import {
 } from 'react-share';
 import axios from 'axios';
 import { useEffect } from 'react';
+import { match } from 'assert';
 
 // Exemple de fausse base de données pour le Club de Futsal d'Avion
 const fakeDatabase = {
@@ -23,6 +24,7 @@ const fakeDatabase = {
       heure: '17:00',
       club: 'Avion Futsal',
       score: '5 - 2',
+      league: 1,
     },
     {
       type: 'current',
@@ -33,6 +35,7 @@ const fakeDatabase = {
       heure: '19:00',
       club: 'Avion Futsal',
       score: '3 - 1',
+      league: 1,
     },
     {
       type: 'upcoming',
@@ -43,20 +46,25 @@ const fakeDatabase = {
       heure: '20:00',
       club: 'Avion Futsal',
       score: '',
+      league: 1,
     }
   ],
   classement: [
-    { position: 1, equipe: 'Avion Futsal', points: 25 },
-    { position: 2, equipe: 'Toulon Elite Futsal', points: 24 },
-    { position: 3, equipe: 'Goal Futsal Club', points: 23 },
-    { position: 4, equipe: 'Kingherseim FC', points: 15 },
-    { position: 5, equipe: 'Herouville Futsal', points: 10 },
+    [
+      { position: 1, equipe: 'Avion Futsal', points: 25, league: "Ligue 1" },
+      { position: 2, equipe: 'Toulon Elite Futsal', points: 24, league: "Ligue 1" },
+      { position: 3, equipe: 'Goal Futsal Club', points: 23, league: "Ligue 1" },
+      { position: 4, equipe: 'Kingherseim FC', points: 15, league: "test" },
+      { position: 5, equipe: 'Herouville Futsal', points: 10, league: "test" }
+    ]
   ],
   club: {
-    name: "Avion Futsal",
+    name: "Lille",
     lieu: "Salle Blezel",
-    couleur: "noir et blanc",
-  }
+    couleur: "rouge et blanc",
+  },
+  // pour enregistrer l'id de chaque ligue avec sa valeur
+  league: new Map<number, string>()
 };
 
 // Liste des types de contenu
@@ -104,7 +112,7 @@ const contentTypes = [
   {
     id: 9,
     label: 'Débrief du Match',
-    prompt: 'Rédige un débrief complet du dernier match de {club}, où ils ont battu {equipeB} avec un score de {score}. Discute de la manière dont cette victoire a influencé le classement et a permis à {club} de maintenir sa position de leader avec {pointsA} points, tandis que {equipeB} est à {pointsB} points. Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
+    prompt: 'Rédige un débrief complet du dernier match de {clubName}, {equipeA} contre {equipeB} avec un score de {score}. Discute du classement de {clubName} avec les statistiques ci-après: le classement est comme suit {equipeA} est à la {positionA} avec {pointsA} points position et {equipeB} est à la {positionB} avec {pointsB} points . Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
   },
   {
     id: 10,
@@ -130,6 +138,11 @@ const App: React.FC = () => {
     }
   };
 
+  const parseDateDDMMYYYY = (dateStr: string): Date => {
+    const [day, month, year] = dateStr.split('/').map(Number);
+    return new Date(year, month - 1, day); // Month is zero-indexed
+  };
+
   const handleGenerateText = async () => {
     setLoading(true);
     setError(null);
@@ -149,15 +162,49 @@ const App: React.FC = () => {
       if (selectedContentType.id === 9) return m.type === 'past';
       return false;
     });
+    if (selectedContentType.id === 9) {
+      // select all the match past and sort it by date
+
+      let matches = fakeDatabase.matches.filter(elt => elt.type === "past").sort((a, b) => {
+        const dateA = parseDateDDMMYYYY(a.date);
+        const dateB = parseDateDDMMYYYY(b.date);
+        return dateA.getTime() - dateB.getTime(); // Ascending order
+      });
+      // get the last match 
+      const lastMatch = matches[matches.length - 1];
+      console.log("last_match", match)
+      if (match) {
+        match.date = lastMatch.date;
+        match.equipeA = lastMatch.equipeA;
+        match.equipeB = lastMatch.equipeB;
+        match.heure = lastMatch.equipeB;
+        match.lieu = lastMatch.lieu;
+        match.score = lastMatch.score;
+        match.type = lastMatch.type;
+        match.league = lastMatch.league;
+      }
+
+    }
+    //get classement
+    console.log("match", match?.league)
 
     if (match) {
+      let classment: any[] = [];
+      // récupérer la ligue du match pour pouvoir récupérer le classement plus tard
+
+      for (let elt in fakeDatabase.classement) {
+        if (fakeDatabase.classement[elt].length > 0) {
+          if (match.league === Number(fakeDatabase.classement[elt][0].league)) classment = fakeDatabase.classement[elt];
+        }
+      }
+      console.log("classment", classment)
       // Obtenez les points des équipes
-      const pointsA = fakeDatabase.classement.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
-      const pointsB = fakeDatabase.classement.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
+      const pointsA = classment.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
+      const pointsB = classment.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
 
       // Obtenez les positions des équipes
-      const positionA = fakeDatabase.classement.findIndex(equipe => equipe.equipe === match.equipeA) + 1;
-      const positionB = fakeDatabase.classement.findIndex(equipe => equipe.equipe === match.equipeB) + 1;
+      const positionA = classment.findIndex(equipe => equipe.equipe === match.equipeA) + 1;
+      const positionB = classment.findIndex(equipe => equipe.equipe === match.equipeB) + 1;
 
       const [scoreA, scoreB] = match.score.split(' - ').map(Number);
       const clubScore = match.club === match.equipeA ? scoreA : scoreB;
@@ -172,7 +219,12 @@ const App: React.FC = () => {
       } else {
         matchStatus = 'est à égalité.';
       }
-
+      // recupérer les positions des deux équipes
+      let positions: Record<string, string> = {}
+      for (let elt in classment) {
+        if (classment[elt].equipe === match.equipeA) positions["equipeA"] = String(classment[elt].position);
+        else if (classment[elt].equipe === match.equipeB) positions["equipeB"] = String(classment[elt].position);
+      }
       // Remplacez les valeurs dans le prompt
       prompt = prompt
         .replace(/{score}/g, match.score || 'N/A')
@@ -185,9 +237,11 @@ const App: React.FC = () => {
         .replace(/{lieu}/g, match.lieu)
         .replace(/{date}/g, match.date)
         .replace(/{heure}/g, match.heure)
-        .replace(/{clubName}/g, fakeDatabase.club.name)
+        .replace(/{clubName}/g, match.club)
         .replace(/clubColors/g, fakeDatabase.club.couleur)
-        .replace(/{matchStatus}/g, matchStatus);
+        .replace(/{matchStatus}/g, matchStatus)
+        .replace(/{positionA}/g, positions.equipeA)
+        .replace(/{positionB}/g, positions.equipeB)
     }
 
     try {
@@ -203,12 +257,12 @@ const App: React.FC = () => {
   // LIGUE1 61
   // LOSC 79
 
-  const fetchLeagueData = async () => {
+  const fetchLeagueData = async (id: string) => {
     const options = {
       method: 'GET',
       url: 'https://api-football-v1.p.rapidapi.com/v3/standings',
       params: {
-        league: '61',
+        league: id,
         season: '2024'
       },
       headers: {
@@ -220,6 +274,7 @@ const App: React.FC = () => {
     try {
       const response = await axios.request(options);
       console.log("League: ", response.data);
+      return response.data.response[0].league;
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
     }
@@ -229,7 +284,7 @@ const App: React.FC = () => {
     const options = {
       method: 'GET',
       url: 'https://api-football-v1.p.rapidapi.com/v3/teams',
-      params: {id: '79'},
+      params: { id: '79' },
       headers: {
         'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
         'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
@@ -239,8 +294,51 @@ const App: React.FC = () => {
     try {
       const response = await axios.request(options);
       console.log("Equipe: ", response.data);
+      return response.data.response[0].team.name;
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
+    }
+  };
+  let data: any[] = []
+
+  function checkEventStatus(dateString: string): string {
+    // Create a Date object from the input string
+    const eventDate = new Date(dateString);
+    const now = new Date();
+
+    // Calculate the difference in milliseconds
+    const difference = eventDate.getTime() - now.getTime();
+    const ninetyMinutesInMilliseconds = 90 * 60 * 1000;
+
+    if (difference < -ninetyMinutesInMilliseconds) {
+      // Event is already past and has exceeded 90 minutes
+      return "past";
+    } else if (difference >= -ninetyMinutesInMilliseconds && difference <= 0) {
+      // Event is current (within the last 90 minutes or exactly now)
+      return "current";
+    } else {
+      // Event is upcoming
+      return "upcoming";
+    }
+  }
+
+  const fetchFixtureDataById = async (id:any) => {
+    const options = {
+      method: 'GET',
+      url: 'https://api-football-v1.p.rapidapi.com/v3/fixtures',
+      params: { id: id },
+      headers: {
+        'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
+        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      return response.data;
+    } catch (error:any) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      throw error;  // Optional: rethrow the error if you want to handle it higher up
     }
   };
 
@@ -259,19 +357,62 @@ const App: React.FC = () => {
     };
 
     try {
+      const team = await fetchTeamData();
       const response = await axios.request(options);
-      console.log("Matchs: ", response.data);
+      const datas = response.data.response;
+      console.log("datas", response.data)
+      for (const elt in datas) {
+        let tmp: Record<string, string> = {};
+        const date = datas[elt].fixture.date;
+        const dateObj = new Date(date);
+        tmp["date"] = `${dateObj.getUTCDate().toString().padStart(2, '0')}/${(dateObj.getUTCMonth() + 1).toString().padStart(2, '0')}/${dateObj.getUTCFullYear()}`;
+        tmp["heure"] = `${dateObj.getUTCHours().toString().padStart(2, '0')}:${dateObj.getUTCMinutes().toString().padStart(2, '0')}`;
+        tmp["type"] = checkEventStatus(date);
+        tmp["equipeA"] = datas[elt].teams.home.name;
+        tmp["equipeB"] = datas[elt].teams.away.name;
+        tmp["score"] = String(datas[elt].goals.home) + " - " + String(datas[elt].goals.away);
+        tmp["lieu"] = datas[elt].fixture.venue.name;
+        tmp["club"] = team;
+        tmp["league"] = datas[elt].league.id;
+        //console.log("tmp",tmp)
+        data.push(tmp);
+        fakeDatabase.league.set(datas[elt].league.id, datas[elt].league.name);
+      }
+      fakeDatabase.matches = data;
+      let classes: any[] = [];
+      const leagues = Array.from(fakeDatabase.league.entries());
+      //console.log("leagues_array",leagues)
+      for (const value of leagues) {
+        const classement = await fetchLeagueData(String(value[0]));
+        //console.log("classement",classement)
+        let ranking: any[] = [];
+        if (classement) {
+          for (let elt of classement.standings[0]) {
+            //console.log("element",elt)
+            let tmp: Record<string, string> = {};
+            //console.log("elt",classement[elt])
+            tmp["position"] = elt.rank;
+            tmp["equipe"] = elt.team.name;
+            tmp["points"] = elt.points;
+            tmp["league"] = classement.id;
+            ranking.push(tmp);
+          }
+        }
+        classes.push(ranking);
+      }
+
+      fakeDatabase.classement = classes;
+      //console.log("fakedatabase",fakeDatabase)
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
   };
 
   useEffect(() => {
-    fetchTeamData();
-    fetchLeagueData();
+    //fetchTeamData();
+    //fetchLeagueData();
     fetchFixtureData();
   }, []);
-
 
   return (
     <div style={{ padding: '20px' }}>
