@@ -25,6 +25,8 @@ const fakeDatabase = {
       club: 'Avion Futsal',
       score: '5 - 2',
       league: 1,
+      events: "",
+      stat: "",
     },
     {
       type: 'current',
@@ -36,6 +38,8 @@ const fakeDatabase = {
       club: 'Avion Futsal',
       score: '3 - 1',
       league: 1,
+      events: "",
+      stat: "",
     },
     {
       type: 'upcoming',
@@ -47,6 +51,8 @@ const fakeDatabase = {
       club: 'Avion Futsal',
       score: '',
       league: 1,
+      events: '',
+      stat: "",
     }
   ],
   classement: [
@@ -75,9 +81,9 @@ const contentTypes = [
     prompt: 'En tant que responsable de la communication de {clubName}, rédige une annonce passionnante pour le match à venir entre {equipeA} et {equipeB}. Mentionne le lieu à {lieu} à {heure} le {date}, et utilise un ton engageant pour motiver les supporters à venir encourager leur équipe. Prends en compte la position de {equipeA} est en {positionA} position avec {pointsA} et {equipeB}, qui est en {positionB} position avec {pointsB} points. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
-    id: 2,
-    label: 'Score en Direct',
-    prompt: 'En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour clubName pour annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l\'auditoire! Adapte le texte en fonction de si {clubName} est entrain de gagner ou perdre.  Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Nombre de caractères maximum : 500.'
+    "id": 2,
+    "label": "Score en Direct",
+    "prompt": "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}."
   },
   {
     id: 3,
@@ -112,7 +118,7 @@ const contentTypes = [
   {
     id: 9,
     label: 'Débrief du Match',
-    prompt: 'Rédige un débrief complet du dernier match de {clubName}, {equipeA} contre {equipeB} avec un score de {score}. Discute du classement de {clubName} avec les statistiques ci-après: le classement est comme suit {equipeA} est à la {positionA} avec {pointsA} points position et {equipeB} est à la {positionB} avec {pointsB} points . Inclue des statistiques clés et des commentaires sur les performances des joueurs.'
+    prompt: 'Rédige un débrief complet du dernier match de {clubName}, {equipeA} contre {equipeB} avec un score de {score}. Discute du classement de {clubName} avec les statistiques ci-après: le classement est comme suit {equipeA} est à la {positionA} avec {pointsA} points position et {equipeB} est à la {positionB} avec {pointsB} points . Inclue des statistiques clés dans {statistiques}, les évènements {events} du match  et des commentaires sur les performances des joueurs.'
   },
   {
     id: 10,
@@ -172,7 +178,8 @@ const App: React.FC = () => {
       });
       // get the last match 
       const lastMatch = matches[matches.length - 1];
-      console.log("last_match", match)
+      console.log("fakedatabase_match", fakeDatabase.matches);
+      console.log("lastMatch", lastMatch);
       if (match) {
         match.date = lastMatch.date;
         match.equipeA = lastMatch.equipeA;
@@ -182,6 +189,8 @@ const App: React.FC = () => {
         match.score = lastMatch.score;
         match.type = lastMatch.type;
         match.league = lastMatch.league;
+        match.stat = lastMatch.stat;
+        match.events = lastMatch.events;
       }
 
     }
@@ -209,6 +218,24 @@ const App: React.FC = () => {
       const [scoreA, scoreB] = match.score.split(' - ').map(Number);
       const clubScore = match.club === match.equipeA ? scoreA : scoreB;
       const opponentScore = match.club === match.equipeA ? scoreB : scoreA;
+
+      console.log(match.events);
+      const lastGoalEvent = match.events
+        .split('.') // Séparer les événements par point
+        .filter(event => event.toLowerCase().includes('goal') || event.toLowerCase().includes('penalty') && !event.toLowerCase().includes('confirmed')) // Filtrer uniquement les événements contenant "goal"
+        .shift();
+      console.log("dernier but: ", lastGoalEvent);
+      let goalAnnouncement = '';
+      if (lastGoalEvent) {
+        if (lastGoalEvent.includes(match.club)) {
+          // Si le but est marqué par le club d'Avion Futsal
+          goalAnnouncement = `⚽️ GOOOAAALLLL pour ${match.club} ! ${lastGoalEvent}`;
+        } else {
+          // Si le but est marqué par l'équipe adverse
+          goalAnnouncement = `⚽️ Aïe... But pour ${match.equipeB} ! ${lastGoalEvent}`;
+        }
+      }
+      console.log(goalAnnouncement);
 
       // Adaptation du prompt en fonction de qui gagne
       let matchStatus = '';
@@ -242,7 +269,12 @@ const App: React.FC = () => {
         .replace(/{matchStatus}/g, matchStatus)
         .replace(/{positionA}/g, positions.equipeA)
         .replace(/{positionB}/g, positions.equipeB)
+        .replace(/{statistiques}/g, match.stat)
+        .replace(/{events}/g, match.events)
+        .replace(/{lastGoal}/g, goalAnnouncement || 'Pas de but pour l\'instant.')
     }
+
+    console.log(prompt);
 
     try {
       const generatedText = await generateText(prompt);
@@ -277,6 +309,25 @@ const App: React.FC = () => {
       return response.data.response[0].league;
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
+    }
+  };
+
+  const fetchFixtureDataById = async (id: any) => {
+    const options = {
+      method: 'GET',
+      url: 'https://api-football-v1.p.rapidapi.com/v3/fixtures',
+      params: { id: id },
+      headers: {
+        'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
+        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+      }
+    };
+    try {
+      const response = await axios.request(options);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      throw error;  // Optional: rethrow the error if you want to handle it higher up
     }
   };
 
@@ -360,8 +411,44 @@ const App: React.FC = () => {
       const team = await fetchTeamData();
       const response = await axios.request(options);
       const datas = response.data.response;
-      console.log("datas", response.data)
+      //console.log("datas",response.data)
       for (const elt in datas) {
+        const fixtureData = await fetchFixtureDataById(datas[elt].fixture.id);
+        //console.log("FixtureData",fixtureData.response[0]);
+        // récupération de tous les évènements
+        let events = fixtureData.response[0].events;
+        let evts = [];
+        //console.log("Events",events)
+        for (let event of events) {
+          let evenement: Record<string, string> = {};
+          evenement["type"] = event.detail;
+          evenement["team"] = event.team.name;
+          evenement["player"] = event.player.name;
+          evenement["time"] = event.time.elapsed;
+          evts.push(evenement);
+        }
+        // Liaison de tous les évènements dans une seule chaîne de caractère
+        let evenement_str = ""
+        for (let elt of evts) {
+          let str = String("Le joueur " + elt.player + " de l'équipe " + elt.team + " a fait un " + elt.type + " à la " + elt.time + "ème de minutes.")
+          evenement_str += str;
+        }
+        let stat = fixtureData.response[0].statistics;
+        // collection des statistiques dans une chaîne de caractère
+        console.log("avnt_push")
+        let resume_stat = "";
+        let stats = [];
+        if (stat.length > 0) {
+          for (let s of stat) {
+            let repr = String("La statistique de l'équipe " + s.team.name + " pendant le match:\n ")
+            if (s.statistics.length > 0) {
+              for (let sta of s.statistics) {
+                repr += String(sta.type + " a pour valeur " + String(sta.value) + "\n")
+              }
+            }
+            resume_stat += repr;
+          }
+        } else resume_stat = " Il n'y a aucune statistique enregistrée";
         let tmp: Record<string, string> = {};
         const date = datas[elt].fixture.date;
         const dateObj = new Date(date);
@@ -374,11 +461,14 @@ const App: React.FC = () => {
         tmp["lieu"] = datas[elt].fixture.venue.name;
         tmp["club"] = team;
         tmp["league"] = datas[elt].league.id;
+        tmp["events"] = evenement_str;
+        tmp["stat"] = resume_stat;
         //console.log("tmp",tmp)
         data.push(tmp);
         fakeDatabase.league.set(datas[elt].league.id, datas[elt].league.name);
       }
       fakeDatabase.matches = data;
+      console.log("fakedatabase_sortie", fakeDatabase.matches);
       let classes: any[] = [];
       const leagues = Array.from(fakeDatabase.league.entries());
       //console.log("leagues_array",leagues)
