@@ -83,47 +83,47 @@ const contentTypes = [
   {
     "id": 2,
     "label": "Score en Direct",
-    "prompt": "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}."
+    "prompt": "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram."
   },
   {
     id: 3,
     label: 'Repas d\'Avant Match',
-    prompt: 'Rédige une annonce engageante pour un repas d\'avant match qui se déroulera à {lieu} avant le match entre {equipeA} et {equipeB}. Incite les membres et supporters à se joindre à nous pour partager un moment convivial et faire le plein d\'énergie avant le match.'
+    prompt: 'Rédige une annonce engageante pour un repas d\'avant match qui se déroulera à {lieu} avant le match entre {equipeA} et {equipeB}. Incite les membres et supporters à se joindre à nous pour partager un moment convivial et faire le plein d\'énergie avant le match. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 4,
     label: 'Journée Porte Ouverte',
-    prompt: 'Rédige un message chaleureux et invitant pour encourager les supporters et les nouveaux membres à participer à notre journée porte ouverte au club. Explique ce qui les attend et pourquoi c\'est une excellente occasion de découvrir le club et ses activités.'
+    prompt: 'Rédige un message chaleureux et invitant pour encourager les supporters et les nouveaux membres à participer à notre journée porte ouverte au club. Explique ce qui les attend et pourquoi c\'est une excellente occasion de découvrir le club et ses activités. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Crée un programme détaillé du mois présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque événement afin d’inciter les supporters à assister.'
+    prompt: 'Crée un programme détaillé du mois présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque événement afin d’inciter les supporters à assister. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.' 
   },
   {
     id: 6,
     label: 'Campagne d\'Abonnement',
-    prompt: 'Écris un message accrocheur et convaincant pour inciter les supporters à s\'abonner ou se réabonner. Mets en avant les avantages exclusifs réservés aux abonnés et encourage-les à rejoindre notre communauté passionnée.'
+    prompt: 'Écris un message accrocheur et convaincant pour inciter les supporters à s\'abonner ou se réabonner. Mets en avant les avantages exclusifs réservés aux abonnés et encourage-les à rejoindre notre communauté passionnée. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 7,
     label: 'Assemblée Générale',
-    prompt: 'Rédige une annonce claire et informative pour l\'assemblée générale du club. Mentionne la date, l\'heure et le lieu, tout en soulignant l\'importance de la participation des membres pour discuter des futurs projets du club.'
+    prompt: 'Rédige une annonce claire et informative pour l\'assemblée générale du club. Mentionne la date, l\'heure et le lieu, tout en soulignant l\'importance de la participation des membres pour discuter des futurs projets du club. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 8,
     label: 'Bus des Supporters',
-    prompt: 'Annonce la mise en place d\'un bus pour les supporters se rendant au match entre {equipeA} et {equipeB}. Détaille les horaires, le point de départ, et encourage les supporters à réserver leur place pour se rendre au match ensemble.'
+    prompt: 'Annonce la mise en place d\'un bus pour les supporters se rendant au match entre {equipeA} et {equipeB}. Détaille les horaires, le point de départ, et encourage les supporters à réserver leur place pour se rendre au match ensemble. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 9,
     label: 'Débrief du Match',
-    prompt: 'Rédige un débrief complet du dernier match de {clubName}, {equipeA} contre {equipeB} avec un score de {score}. Discute du classement de {clubName} avec les statistiques ci-après: le classement est comme suit {equipeA} est à la {positionA} avec {pointsA} points position et {equipeB} est à la {positionB} avec {pointsB} points . Inclue des statistiques clés dans {statistiques}, les évènements {events} du match  et des commentaires sur les performances des joueurs.'
+    prompt: 'En tant que responsable de la communication de {clubName},rédige un débrief complet du dernier match {equipeA} contre {equipeB} avec un score de {score}. Discute du classement de {clubName} avec les statistiques ci-après: le classement est comme suit {equipeA} est à la {positionA} avec {pointsA} points position et {equipeB} est à la {positionB} avec {pointsB} points . Inclue des statistiques clés dans {statistiques}, les évènements {events} du match  et des commentaires sur les performances des joueurs. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram. '
   },
   {
     id: 10,
     label: 'Classement',
-    prompt: 'Écris un message informatif sur le classement actuel des équipes de futsal, en mettant en avant comment les performances récentes des équipes, notamment celles de {club}, ont influencé leur position. Décris les matchs à venir qui pourraient affecter le classement et encourage les supporters à soutenir leur équipe pour maintenir ou améliorer sa position.'
+    prompt: 'En tant que responsable de la communication de {club}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras le classement dans le message.'
   }
 ];
 
@@ -168,8 +168,10 @@ const App: React.FC = () => {
       if (selectedContentType.id === 9) return m.type === 'past';
       return false;
     });
-    if (selectedContentType.id === 9) {
-      // select all the match past and sort it by date
+// chaîne pour représenter le classement du club
+    let repr_class  = "";
+    if(selectedContentType.id === 9){
+// select all the match past and sort it by date
 
       let matches = fakeDatabase.matches.filter(elt => elt.type === "past").sort((a, b) => {
         const dateA = parseDateDDMMYYYY(a.date);
@@ -178,8 +180,8 @@ const App: React.FC = () => {
       });
       // get the last match 
       const lastMatch = matches[matches.length - 1];
-      console.log("fakedatabase_match", fakeDatabase.matches);
-      console.log("lastMatch", lastMatch);
+      // console.log("fakedatabase_match", fakeDatabase.matches);
+      // console.log("lastMatch", lastMatch);
       if (match) {
         match.date = lastMatch.date;
         match.equipeA = lastMatch.equipeA;
@@ -194,9 +196,27 @@ const App: React.FC = () => {
       }
 
     }
-    //get classement
-    console.log("match", match?.league)
-
+// récupérer le classement
+    else if(selectedContentType.id === 10){
+      //console.log("classement dans le fake:",fakeDatabase.classement);
+      let club_classmnt:any[] = [];
+      for (let elt in fakeDatabase.classement){
+        if(fakeDatabase.classement[elt].length > 0){
+           //let classmnts = fakeDatabase.classement[elt];
+           for (let rang of fakeDatabase.classement[elt]){
+              if(rang.equipe === fakeDatabase.club.name) club_classmnt.push(rang);
+           }
+        } 
+      }
+      console.log("ranking",club_classmnt);
+      
+      for (let c of club_classmnt){
+        let r = String("Dans la "+fakeDatabase.league.get(Number(c.league))+",l'équipe "+c.equipe+ " est à la "+c.position+" avec "+c.points+"\n")
+        repr_class+= r;
+      }
+    }
+    
+    
     if (match) {
       let classment: any[] = [];
       // récupérer la ligue du match pour pouvoir récupérer le classement plus tard
@@ -206,7 +226,7 @@ const App: React.FC = () => {
           if (match.league === Number(fakeDatabase.classement[elt][0].league)) classment = fakeDatabase.classement[elt];
         }
       }
-      console.log("classment", classment)
+
       // Obtenez les points des équipes
       const pointsA = classment.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
       const pointsB = classment.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
@@ -273,6 +293,13 @@ const App: React.FC = () => {
         .replace(/{events}/g, match.events)
         .replace(/{lastGoal}/g, goalAnnouncement || 'Pas de but pour l\'instant.')
     }
+// dans le cas où on veut afficher le classement
+    console.log("classement",repr_class);
+    prompt = prompt
+    .replace(/{classement}/g,repr_class)
+    .replace(/{club}/g,fakeDatabase.club.name)
+    .replace(/clubColors/g, fakeDatabase.club.couleur)
+    console.log("prompt",prompt)
 
     console.log(prompt);
 
@@ -305,7 +332,7 @@ const App: React.FC = () => {
 
     try {
       const response = await axios.request(options);
-      console.log("League: ", response.data);
+      //console.log("League: ", response.data);
       return response.data.response[0].league;
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
@@ -344,7 +371,7 @@ const App: React.FC = () => {
 
     try {
       const response = await axios.request(options);
-      console.log("Equipe: ", response.data);
+      //console.log("Equipe: ", response.data);
       return response.data.response[0].team.name;
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
@@ -448,8 +475,8 @@ const App: React.FC = () => {
         fakeDatabase.league.set(datas[elt].league.id, datas[elt].league.name);
       }
       fakeDatabase.matches = data;
-      console.log("fakedatabase_sortie", fakeDatabase.matches);
-      let classes: any[] = [];
+      //console.log("fakedatabase_sortie",fakeDatabase.matches);
+      let classes:any[] = [];
       const leagues = Array.from(fakeDatabase.league.entries());
       //console.log("leagues_array",leagues)
       for (const value of leagues) {
@@ -520,7 +547,9 @@ const App: React.FC = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <div style={{ marginTop: '20px' }}>
         <h2>Texte généré :</h2>
-        <p>{text}</p>
+        <div style={{ whiteSpace: 'pre-line' }}>
+          {text}
+        </div>
         {imagePreview && (
           <div style={{ marginTop: '10px' }}>
             <h3>Image incluse :</h3>
