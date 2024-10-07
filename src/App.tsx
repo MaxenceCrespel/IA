@@ -223,7 +223,7 @@ const App: React.FC = () => {
       const lastGoalEvent = match.events
         .split('.') // Séparer les événements par point
         .filter(event => event.toLowerCase().includes('goal') || event.toLowerCase().includes('penalty') && !event.toLowerCase().includes('confirmed')) // Filtrer uniquement les événements contenant "goal"
-        .shift();
+        .pop();
       console.log("dernier but: ", lastGoalEvent);
       let goalAnnouncement = '';
       if (lastGoalEvent) {
