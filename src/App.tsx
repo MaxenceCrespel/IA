@@ -180,7 +180,6 @@ const App: React.FC = () => {
       const lastMatch = matches[matches.length - 1];
       console.log("fakedatabase_match", fakeDatabase.matches);
       console.log("lastMatch", lastMatch);
-
       if (match) {
         match.date = lastMatch.date;
         match.equipeA = lastMatch.equipeA;
@@ -374,6 +373,25 @@ const App: React.FC = () => {
     }
   }
 
+  const fetchFixtureDataById = async (id:any) => {
+    const options = {
+      method: 'GET',
+      url: 'https://api-football-v1.p.rapidapi.com/v3/fixtures',
+      params: { id: id },
+      headers: {
+        'x-rapidapi-key': '8cfde1e9b0msh5ab936b883095bep1a8bc8jsn087d9cdcaa15',
+        'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      return response.data;
+    } catch (error:any) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      throw error;  // Optional: rethrow the error if you want to handle it higher up
+    }
+  };
 
   const fetchFixtureData = async () => {
     const options = {
