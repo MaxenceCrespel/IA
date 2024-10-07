@@ -98,7 +98,7 @@ const contentTypes = [
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Crée un programme détaillé du mois présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque événement afin d’inciter les supporters à assister. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.' 
+    prompt: 'Crée un programme détaillé de ce mois-ci présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque match suivant afin d’inciter les supporters à assister: {matchs}. Les couleurs du club sont {clubColors} ' 
   },
   {
     id: 6,
@@ -123,7 +123,7 @@ const contentTypes = [
   {
     id: 10,
     label: 'Classement',
-    prompt: 'En tant que responsable de la communication de {club}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras le classement dans le message.'
+    prompt: 'En tant que responsable de la communication de {club}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras les classements de toutes les ligues où {club} participe dans chaque message.'
   }
 ];
 
@@ -165,7 +165,7 @@ const App: React.FC = () => {
       if (selectedContentType.id === 6) return m.type === 'upcoming';
       if (selectedContentType.id === 7) return m.type === 'upcoming';
       if (selectedContentType.id === 8) return m.type === 'past';
-      if (selectedContentType.id === 9) return m.type === 'past';
+      //if (selectedContentType.id === 9) return m.type === 'past';
       return false;
     });
 // chaîne pour représenter le classement du club
@@ -214,6 +214,32 @@ const App: React.FC = () => {
         let r = String("Dans la "+fakeDatabase.league.get(Number(c.league))+",l'équipe "+c.equipe+ " est à la "+c.position+" avec "+c.points+"\n")
         repr_class+= r;
       }
+// dans le cas où on veut afficher le classement
+      prompt = prompt
+      .replace(/{classement}/g,repr_class)
+      .replace(/{club}/g,fakeDatabase.club.name)
+      .replace(/clubColors/g, fakeDatabase.club.couleur)
+    }
+// affichage du programme du mois
+    else if(selectedContentType.id === 5){
+// récupérer le mois actuel
+      let month = new Date().getMonth() ;
+// récupérer les matchs du club pour ce mois-ci
+      let matchs: any[] = [];
+      for (let match of fakeDatabase.matches){
+          if (parseDateDDMMYYYY(match.date).getMonth() == month && match.club == fakeDatabase.club.name)
+             matchs.push(match);
+      }
+      let info_match = "";
+      for (let match of matchs){
+         let club_league= fakeDatabase.league.get(Number(match.league));
+         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu);
+         info_match += r_match;
+      }
+      prompt = prompt
+      .replace(/{matchs}/g,info_match)
+      .replace(/{club}/g,fakeDatabase.club.name)
+      .replace(/{clubColors}/g,fakeDatabase.club.couleur)
     }
     
     
@@ -273,13 +299,7 @@ const App: React.FC = () => {
         .replace(/{statistiques}/g,match.stat)
         .replace(/{events}/g,match.events)
     }
-// dans le cas où on veut afficher le classement
-    console.log("classement",repr_class);
-    prompt = prompt
-    .replace(/{classement}/g,repr_class)
-    .replace(/{club}/g,fakeDatabase.club.name)
-    .replace(/clubColors/g, fakeDatabase.club.couleur)
-    console.log("prompt",prompt)
+
 
     try {
       const generatedText = await generateText(prompt);
