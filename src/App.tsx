@@ -10,9 +10,7 @@ import {
 } from 'react-share';
 import axios from 'axios';
 import { useEffect } from 'react';
-import { match } from 'assert';
 
-// Exemple de fausse base de données pour le Club de Futsal d'Avion
 const fakeDatabase = {
   matches: [
     {
@@ -69,11 +67,9 @@ const fakeDatabase = {
     lieu: "Salle Blezel",
     couleur: "rouge et blanc",
   },
-  // pour enregistrer l'id de chaque ligue avec sa valeur
   league: new Map<number, string>()
 };
 
-// Liste des types de contenu
 const contentTypes = [
   {
     id: 1,
@@ -81,9 +77,9 @@ const contentTypes = [
     prompt: 'En tant que responsable de la communication de {clubName}, rédige une annonce passionnante pour le match à venir entre {equipeA} et {equipeB}. Mentionne le lieu à {lieu} à {heure} le {date}, et utilise un ton engageant pour motiver les supporters à venir encourager leur équipe. Prends en compte la position de {equipeA} est en {positionA} position avec {pointsA} et {equipeB}, qui est en {positionB} position avec {pointsB} points. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
-    "id": 2,
-    "label": "Score en Direct",
-    "prompt": "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram."
+    id: 2,
+    label: "Score en Direct",
+    prompt: "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram."
   },
   {
     id: 3,
@@ -98,7 +94,7 @@ const contentTypes = [
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Crée un programme détaillé du mois présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque événement afin d’inciter les supporters à assister. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.' 
+    prompt: 'Crée un programme détaillé du mois présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque événement afin d’inciter les supporters à assister. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 6,
@@ -140,13 +136,13 @@ const App: React.FC = () => {
     if (file) {
       setSelectedImage(file);
       const imageUrl = URL.createObjectURL(file);
-      setImagePreview(imageUrl); // Pour l'aperçu de l'image
+      setImagePreview(imageUrl);
     }
   };
 
   const parseDateDDMMYYYY = (dateStr: string): Date => {
     const [day, month, year] = dateStr.split('/').map(Number);
-    return new Date(year, month - 1, day); // Month is zero-indexed
+    return new Date(year, month - 1, day);
   };
 
   const handleGenerateText = async () => {
@@ -155,7 +151,6 @@ const App: React.FC = () => {
 
     let prompt = selectedContentType.prompt;
 
-    // Cherche le match correspondant
     const match = fakeDatabase.matches.find(m => {
       if (selectedContentType.id === 1) return m.type === 'upcoming';
       if (selectedContentType.id === 2) return m.type === 'current';
@@ -168,20 +163,15 @@ const App: React.FC = () => {
       if (selectedContentType.id === 9) return m.type === 'past';
       return false;
     });
-// chaîne pour représenter le classement du club
-    let repr_class  = "";
-    if(selectedContentType.id === 9){
-// select all the match past and sort it by date
+    let repr_class = "";
+    if (selectedContentType.id === 9) {
 
       let matches = fakeDatabase.matches.filter(elt => elt.type === "past").sort((a, b) => {
         const dateA = parseDateDDMMYYYY(a.date);
         const dateB = parseDateDDMMYYYY(b.date);
-        return dateA.getTime() - dateB.getTime(); // Ascending order
+        return dateA.getTime() - dateB.getTime();
       });
-      // get the last match 
       const lastMatch = matches[matches.length - 1];
-      // console.log("fakedatabase_match", fakeDatabase.matches);
-      // console.log("lastMatch", lastMatch);
       if (match) {
         match.date = lastMatch.date;
         match.equipeA = lastMatch.equipeA;
@@ -196,30 +186,26 @@ const App: React.FC = () => {
       }
 
     }
-// récupérer le classement
-    else if(selectedContentType.id === 10){
-      //console.log("classement dans le fake:",fakeDatabase.classement);
-      let club_classmnt:any[] = [];
-      for (let elt in fakeDatabase.classement){
-        if(fakeDatabase.classement[elt].length > 0){
-           //let classmnts = fakeDatabase.classement[elt];
-           for (let rang of fakeDatabase.classement[elt]){
-              if(rang.equipe === fakeDatabase.club.name) club_classmnt.push(rang);
-           }
-        } 
+    else if (selectedContentType.id === 10) {
+      let club_classmnt: any[] = [];
+      for (let elt in fakeDatabase.classement) {
+        if (fakeDatabase.classement[elt].length > 0) {
+          for (let rang of fakeDatabase.classement[elt]) {
+            if (rang.equipe === fakeDatabase.club.name) club_classmnt.push(rang);
+          }
+        }
       }
-      console.log("ranking",club_classmnt);
-      
-      for (let c of club_classmnt){
-        let r = String("Dans la "+fakeDatabase.league.get(Number(c.league))+",l'équipe "+c.equipe+ " est à la "+c.position+" avec "+c.points+"\n")
-        repr_class+= r;
+      console.log("ranking", club_classmnt);
+
+      for (let c of club_classmnt) {
+        let r = String("Dans la " + fakeDatabase.league.get(Number(c.league)) + ",l'équipe " + c.equipe + " est à la " + c.position + " avec " + c.points + "\n")
+        repr_class += r;
       }
     }
-    
-    
+
+
     if (match) {
       let classment: any[] = [];
-      // récupérer la ligue du match pour pouvoir récupérer le classement plus tard
 
       for (let elt in fakeDatabase.classement) {
         if (fakeDatabase.classement[elt].length > 0) {
@@ -227,11 +213,9 @@ const App: React.FC = () => {
         }
       }
 
-      // Obtenez les points des équipes
       const pointsA = classment.find(equipe => equipe.equipe === match.equipeA)?.points || 0;
       const pointsB = classment.find(equipe => equipe.equipe === match.equipeB)?.points || 0;
 
-      // Obtenez les positions des équipes
       const positionA = classment.findIndex(equipe => equipe.equipe === match.equipeA) + 1;
       const positionB = classment.findIndex(equipe => equipe.equipe === match.equipeB) + 1;
 
@@ -241,23 +225,20 @@ const App: React.FC = () => {
 
       console.log(match.events);
       const lastGoalEvent = match.events
-        .split('.') // Séparer les événements par point
-        .filter(event => event.toLowerCase().includes('goal') || event.toLowerCase().includes('penalty') && !event.toLowerCase().includes('confirmed')) // Filtrer uniquement les événements contenant "goal"
+        .split('.')
+        .filter(event => event.toLowerCase().includes('goal') || event.toLowerCase().includes('penalty') && !event.toLowerCase().includes('confirmed'))
         .pop();
       console.log("dernier but: ", lastGoalEvent);
       let goalAnnouncement = '';
       if (lastGoalEvent) {
         if (lastGoalEvent.includes(match.club)) {
-          // Si le but est marqué par le club d'Avion Futsal
           goalAnnouncement = `⚽️ GOOOAAALLLL pour ${match.club} ! ${lastGoalEvent}`;
         } else {
-          // Si le but est marqué par l'équipe adverse
           goalAnnouncement = `⚽️ Aïe... But pour ${match.equipeB} ! ${lastGoalEvent}`;
         }
       }
       console.log(goalAnnouncement);
 
-      // Adaptation du prompt en fonction de qui gagne
       let matchStatus = '';
       if (clubScore > opponentScore) {
         matchStatus = 'est actuellement en train de gagner !';
@@ -266,13 +247,11 @@ const App: React.FC = () => {
       } else {
         matchStatus = 'est à égalité.';
       }
-      // recupérer les positions des deux équipes
       let positions: Record<string, string> = {}
       for (let elt in classment) {
         if (classment[elt].equipe === match.equipeA) positions["equipeA"] = String(classment[elt].position);
         else if (classment[elt].equipe === match.equipeB) positions["equipeB"] = String(classment[elt].position);
       }
-      // Remplacez les valeurs dans le prompt
       prompt = prompt
         .replace(/{score}/g, match.score || 'N/A')
         .replace(/{equipeA}/g, match.equipeA)
@@ -293,13 +272,12 @@ const App: React.FC = () => {
         .replace(/{events}/g, match.events)
         .replace(/{lastGoal}/g, goalAnnouncement || 'Pas de but pour l\'instant.')
     }
-// dans le cas où on veut afficher le classement
-    console.log("classement",repr_class);
+    console.log("classement", repr_class);
     prompt = prompt
-    .replace(/{classement}/g,repr_class)
-    .replace(/{club}/g,fakeDatabase.club.name)
-    .replace(/clubColors/g, fakeDatabase.club.couleur)
-    console.log("prompt",prompt)
+      .replace(/{classement}/g, repr_class)
+      .replace(/{club}/g, fakeDatabase.club.name)
+      .replace(/clubColors/g, fakeDatabase.club.couleur)
+    console.log("prompt", prompt)
 
     console.log(prompt);
 
@@ -312,9 +290,6 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // LIGUE1 61
-  // LOSC 79
 
   const fetchLeagueData = async (id: string) => {
     const options = {
@@ -332,7 +307,6 @@ const App: React.FC = () => {
 
     try {
       const response = await axios.request(options);
-      //console.log("League: ", response.data);
       return response.data.response[0].league;
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
@@ -354,7 +328,7 @@ const App: React.FC = () => {
       return response.data;
     } catch (error: any) {
       console.error('Error:', error.response ? error.response.data : error.message);
-      throw error;  // Optional: rethrow the error if you want to handle it higher up
+      throw error;
     }
   };
 
@@ -371,7 +345,6 @@ const App: React.FC = () => {
 
     try {
       const response = await axios.request(options);
-      //console.log("Equipe: ", response.data);
       return response.data.response[0].team.name;
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
@@ -380,22 +353,17 @@ const App: React.FC = () => {
   let data: any[] = []
 
   function checkEventStatus(dateString: string): string {
-    // Create a Date object from the input string
     const eventDate = new Date(dateString);
     const now = new Date();
 
-    // Calculate the difference in milliseconds
     const difference = eventDate.getTime() - now.getTime();
     const ninetyMinutesInMilliseconds = 90 * 60 * 1000;
 
     if (difference < -ninetyMinutesInMilliseconds) {
-      // Event is already past and has exceeded 90 minutes
       return "past";
     } else if (difference >= -ninetyMinutesInMilliseconds && difference <= 0) {
-      // Event is current (within the last 90 minutes or exactly now)
       return "current";
     } else {
-      // Event is upcoming
       return "upcoming";
     }
   }
@@ -418,14 +386,10 @@ const App: React.FC = () => {
       const team = await fetchTeamData();
       const response = await axios.request(options);
       const datas = response.data.response;
-      //console.log("datas",response.data)
       for (const elt in datas) {
         const fixtureData = await fetchFixtureDataById(datas[elt].fixture.id);
-        //console.log("FixtureData",fixtureData.response[0]);
-        // récupération de tous les évènements
         let events = fixtureData.response[0].events;
         let evts = [];
-        //console.log("Events",events)
         for (let event of events) {
           let evenement: Record<string, string> = {};
           evenement["type"] = event.detail;
@@ -434,14 +398,12 @@ const App: React.FC = () => {
           evenement["time"] = event.time.elapsed;
           evts.push(evenement);
         }
-        // Liaison de tous les évènements dans une seule chaîne de caractère
         let evenement_str = ""
         for (let elt of evts) {
           let str = String("Le joueur " + elt.player + " de l'équipe " + elt.team + " a fait un " + elt.type + " à la " + elt.time + "ème de minutes.")
           evenement_str += str;
         }
         let stat = fixtureData.response[0].statistics;
-        // collection des statistiques dans une chaîne de caractère
         console.log("avnt_push")
         let resume_stat = "";
         let stats = [];
@@ -470,24 +432,18 @@ const App: React.FC = () => {
         tmp["league"] = datas[elt].league.id;
         tmp["events"] = evenement_str;
         tmp["stat"] = resume_stat;
-        //console.log("tmp",tmp)
         data.push(tmp);
         fakeDatabase.league.set(datas[elt].league.id, datas[elt].league.name);
       }
       fakeDatabase.matches = data;
-      //console.log("fakedatabase_sortie",fakeDatabase.matches);
-      let classes:any[] = [];
+      let classes: any[] = [];
       const leagues = Array.from(fakeDatabase.league.entries());
-      //console.log("leagues_array",leagues)
       for (const value of leagues) {
         const classement = await fetchLeagueData(String(value[0]));
-        //console.log("classement",classement)
         let ranking: any[] = [];
         if (classement) {
           for (let elt of classement.standings[0]) {
-            //console.log("element",elt)
             let tmp: Record<string, string> = {};
-            //console.log("elt",classement[elt])
             tmp["position"] = elt.rank;
             tmp["equipe"] = elt.team.name;
             tmp["points"] = elt.points;
@@ -499,17 +455,32 @@ const App: React.FC = () => {
       }
 
       fakeDatabase.classement = classes;
-      //console.log("fakedatabase",fakeDatabase)
     } catch (error) {
       console.error('Erreur lors de la récupération des données de l\'équipe:', error);
     }
   };
 
+  const [classement, setClassement] = useState<any>(null);
   useEffect(() => {
-    //fetchTeamData();
-    //fetchLeagueData();
-    fetchFixtureData();
+    const fetchClassement = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/classement');
+        setClassement(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération du classement', error);
+      }
+    };
+
+    fetchClassement();
+    fetchFixtureData(); // Vous devez définir cette fonction ailleurs.
   }, []);
+
+  // Utilisation d'un autre useEffect pour afficher le classement une fois mis à jour
+  useEffect(() => {
+    if (classement && classement.classementGlobal) {
+      console.log("classementGlobal: ", classement.classementGlobal);
+    }
+  }, [classement]);
 
   return (
     <div style={{ padding: '20px' }}>
@@ -545,6 +516,7 @@ const App: React.FC = () => {
       </button>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
+
       <div style={{ marginTop: '20px' }}>
         <h2>Texte généré :</h2>
         <div style={{ whiteSpace: 'pre-line' }}>
@@ -558,30 +530,44 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* {text && (
-        <div style={{ marginTop: '20px' }}>
-          <h3>Partager sur :</h3>
-          <FacebookShareButton
-            url={window.location.href}
-            hashtag="#Futsal"
-          >
-            <FacebookIcon size={32} round />
-          </FacebookShareButton>
-          <TwitterShareButton
-            url={window.location.href}
-            title={text}
-            hashtags={["Futsal"]}
-          >
-            <TwitterIcon size={32} round />
-          </TwitterShareButton>
-          <WhatsappShareButton
-            url={window.location.href}
-            title={text}
-          >
-            <WhatsappIcon size={32} round />
-          </WhatsappShareButton>
-        </div>
-      )} */}
+      <h2>Classement Futsal National D1</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Position</th>
+            <th>Équipe</th>
+            <th>Points</th>
+            <th>Matchs joués</th>
+            <th>Matchs gagnés</th>
+            <th>Matchs nuls</th>
+            <th>Matchs perdus</th>
+            <th>Buts Marqués</th>
+            <th>Buts Contre</th>
+            <th>Différence de Buts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {classement && classement.classementGlobal.map((equipe: any, index: any) => {
+            // Trouvez l'équipe correspondante dans le classement général
+            const equipeGenerale = classement.classementGeneral[index]; // Assurez-vous que l'index est correct
+            return (
+              <tr key={index}>
+                <td className="text-center">{equipe.position ?? 'N/A'}</td>
+                <td className="text-center">{equipe.equipe ?? 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.points : 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.jeux : 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.gagnés : 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.nuls : 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.perdus : 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.p : 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.c : 'N/A'}</td>
+                <td className="text-center">{equipeGenerale ? equipeGenerale.diff : 'N/A'}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };
