@@ -98,7 +98,7 @@ const contentTypes = [
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Affiche le programme détaillé de ce mois-ci en affichant tous les matchs de la liste ci-après : {matchs} de {clubName}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque match suivant afin d’inciter les supporters à assister. Les couleurs du club sont {clubColors} ' 
+    prompt: 'Affiche le programme détaillé de ce mois-ci en affichant tous les matchs de la liste ci-après : {matchs} de {clubName}. Inclue les dates, les heures et les équipes adverses tout en ajoutant un commentaire engageant pour les matchs à venir afin d’inciter les supporters à y assister. Les couleurs du club sont {clubColors} ' 
   },
   {
     id: 6,
@@ -208,7 +208,7 @@ const App: React.FC = () => {
            }
         } 
       }
-      console.log("ranking",club_classmnt);
+      //console.log("ranking",club_classmnt);
       
       for (let c of club_classmnt){
         let r = String("Dans la "+fakeDatabase.league.get(Number(c.league))+",l'équipe "+c.equipe+ " est à la "+c.position+" avec "+c.points+"\n")
@@ -238,10 +238,9 @@ const App: React.FC = () => {
       });
       console.log("match_sorted",match_sorted)
       for (let match of match_sorted){
-          let score = "";
-          if (match.score) score = match.score;
          let club_league= fakeDatabase.league.get(Number(match.league));
-         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu+"\nScore:"+score);
+         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu);
+         if (match.type == "past") r_match += String("\nScore:"+match.score+"\n\n");
          info_match += r_match;
       }
       prompt = prompt
