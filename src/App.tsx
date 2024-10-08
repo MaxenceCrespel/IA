@@ -165,13 +165,14 @@ const App: React.FC = () => {
       if (selectedContentType.id === 6) return m.type === 'upcoming';
       if (selectedContentType.id === 7) return m.type === 'upcoming';
       if (selectedContentType.id === 8) return m.type === 'past';
-      //if (selectedContentType.id === 9) return m.type === 'past';
+      if (selectedContentType.id === 9) return m.type === 'past';
       return false;
     });
 // chaîne pour représenter le classement du club
     let repr_class  = "";
     if(selectedContentType.id === 9){
-// select all the match past and sort it by date
+// select all the match past and sort it by 
+      console.log("Debrief du match")
 
       let matches = fakeDatabase.matches.filter(elt => elt.type === "past").sort((a, b) => {
         const dateA = parseDateDDMMYYYY(a.date);
@@ -194,7 +195,8 @@ const App: React.FC = () => {
         match.stat = lastMatch.stat;
         match.events = lastMatch.events;
       }
-
+      console.log("last_match",lastMatch);
+      console.log("match",match);
     }
 // récupérer le classement
     else if(selectedContentType.id === 10){
@@ -248,7 +250,6 @@ const App: React.FC = () => {
       .replace(/{club}/g,fakeDatabase.club.name)
       .replace(/{clubColors}/g,fakeDatabase.club.couleur)
     }
-    
     
     if (match) {
       let classment: any[] = [];
