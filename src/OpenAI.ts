@@ -8,7 +8,7 @@ export const generateText = async (prompt: string): Promise<string> => {
             {
                 model: 'gpt-3.5-turbo', // Utiliser le modèle gpt-3.5-turbo
                 messages: [{ role: 'user', content: prompt }], // Structure des messages
-                max_tokens: 1000,
+                max_tokens: 2000,
                 temperature: 0.7
             },
             {

@@ -98,7 +98,7 @@ const contentTypes = [
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Crée un programme détaillé de ce mois-ci présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque match suivant afin d’inciter les supporters à assister: {matchs}. Les couleurs du club sont {clubColors} ' 
+    prompt: 'Affiche le programme détaillé de ce mois-ci en affichant tous les matchs de la liste ci-après : {matchs} de {clubName}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque match suivant afin d’inciter les supporters à assister. Les couleurs du club sont {clubColors} ' 
   },
   {
     id: 6,
@@ -231,9 +231,17 @@ const App: React.FC = () => {
              matchs.push(match);
       }
       let info_match = "";
-      for (let match of matchs){
+      let match_sorted = matchs.sort((a,b) => {
+        const dateA = new Date(a.date.split('/').reverse().join('-')); // Convert to YYYY-MM-DD
+        const dateB = new Date(b.date.split('/').reverse().join('-'));
+        return dateA.getTime() - dateB.getTime();
+      });
+      console.log("match_sorted",match_sorted)
+      for (let match of match_sorted){
+          let score = "";
+          if (match.score) score = match.score;
          let club_league= fakeDatabase.league.get(Number(match.league));
-         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu);
+         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu+"\nScore:"+score);
          info_match += r_match;
       }
       prompt = prompt
