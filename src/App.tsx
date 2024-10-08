@@ -98,7 +98,7 @@ const contentTypes = [
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Crée un programme détaillé du mois présentant tous les matchs de {club}. Inclue les dates, les heures et les équipes adverses, tout en ajoutant un commentaire engageant pour chaque événement afin d’inciter les supporters à assister. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.' 
+    prompt: 'Affiche le programme détaillé de ce mois-ci en affichant tous les matchs de la liste ci-après : {matchs} de {clubName}. Inclue les dates, les heures et les équipes adverses tout en ajoutant un commentaire engageant pour les matchs à venir afin d’inciter les supporters à y assister. Les couleurs du club sont {clubColors} ' 
   },
   {
     id: 6,
@@ -123,7 +123,7 @@ const contentTypes = [
   {
     id: 10,
     label: 'Classement',
-    prompt: 'En tant que responsable de la communication de {club}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras le classement dans le message.'
+    prompt: 'En tant que responsable de la communication de {club}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras les classements de toutes les ligues où {club} participe dans chaque message.'
   }
 ];
 
@@ -171,7 +171,8 @@ const App: React.FC = () => {
 // chaîne pour représenter le classement du club
     let repr_class  = "";
     if(selectedContentType.id === 9){
-// select all the match past and sort it by date
+// select all the match past and sort it by 
+      console.log("Debrief du match")
 
       let matches = fakeDatabase.matches.filter(elt => elt.type === "past").sort((a, b) => {
         const dateA = parseDateDDMMYYYY(a.date);
@@ -194,7 +195,8 @@ const App: React.FC = () => {
         match.stat = lastMatch.stat;
         match.events = lastMatch.events;
       }
-
+      console.log("last_match",lastMatch);
+      console.log("match",match);
     }
 // récupérer le classement
     else if(selectedContentType.id === 10){
@@ -208,14 +210,46 @@ const App: React.FC = () => {
            }
         } 
       }
-      console.log("ranking",club_classmnt);
+      //console.log("ranking",club_classmnt);
       
       for (let c of club_classmnt){
         let r = String("Dans la "+fakeDatabase.league.get(Number(c.league))+",l'équipe "+c.equipe+ " est à la "+c.position+" avec "+c.points+"\n")
         repr_class+= r;
       }
+// dans le cas où on veut afficher le classement
+      prompt = prompt
+      .replace(/{classement}/g,repr_class)
+      .replace(/{club}/g,fakeDatabase.club.name)
+      .replace(/clubColors/g, fakeDatabase.club.couleur)
     }
-    
+// affichage du programme du mois
+    else if(selectedContentType.id === 5){
+// récupérer le mois actuel
+      let month = new Date().getMonth() ;
+// récupérer les matchs du club pour ce mois-ci
+      let matchs: any[] = [];
+      for (let match of fakeDatabase.matches){
+          if (parseDateDDMMYYYY(match.date).getMonth() == month && match.club == fakeDatabase.club.name)
+             matchs.push(match);
+      }
+      let info_match = "";
+      let match_sorted = matchs.sort((a,b) => {
+        const dateA = new Date(a.date.split('/').reverse().join('-')); // Convert to YYYY-MM-DD
+        const dateB = new Date(b.date.split('/').reverse().join('-'));
+        return dateA.getTime() - dateB.getTime();
+      });
+      console.log("match_sorted",match_sorted)
+      for (let match of match_sorted){
+         let club_league= fakeDatabase.league.get(Number(match.league));
+         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu);
+         if (match.type == "past") r_match += String("\nScore:"+match.score+"\n\n");
+         info_match += r_match;
+      }
+      prompt = prompt
+      .replace(/{matchs}/g,info_match)
+      .replace(/{club}/g,fakeDatabase.club.name)
+      .replace(/{clubColors}/g,fakeDatabase.club.couleur)
+    }
     
     if (match) {
       let classment: any[] = [];
@@ -293,13 +327,7 @@ const App: React.FC = () => {
         .replace(/{events}/g, match.events)
         .replace(/{lastGoal}/g, goalAnnouncement || 'Pas de but pour l\'instant.')
     }
-// dans le cas où on veut afficher le classement
-    console.log("classement",repr_class);
-    prompt = prompt
-    .replace(/{classement}/g,repr_class)
-    .replace(/{club}/g,fakeDatabase.club.name)
-    .replace(/clubColors/g, fakeDatabase.club.couleur)
-    console.log("prompt",prompt)
+
 
     console.log(prompt);
 
