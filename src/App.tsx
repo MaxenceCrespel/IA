@@ -78,7 +78,7 @@ const contentTypes = [
   {
     id: 1,
     label: 'Annonce Match',
-    prompt: 'As a community manager for {clubName}, write an exciting announcement for the upcoming match between {teamA} and {teamB}. Mention the location at {lieu} at {heure} on {date}, and use an engaging tone to motivate fans to come and cheer on their team. Consider the position of {equipeA} is in {positionA} position with {pointsA} and {equipeB}, which is in {positionB} position with {pointsB} points. A victory is worth 3 points, a draw 1 point and a defeat 0 points. The colors of {clubName} are {clubColors}. Make 3 suggestions, one for X, one for Facebook and one for Instagram.'
+    prompt: 'As a community manager for {clubName}, write an exciting announcement for the upcoming match between {equipeA} and {equipeB}. Mention the location at {lieu} at {heure} on {date}, and use an engaging tone to motivate fans to come and cheer on their team. Consider the position of {equipeA} is in {positionA} position with {pointsA} and {equipeB}, which is in {positionB} position with {pointsB} points. A victory is worth 3 points, a draw 1 point and a defeat 0 points. The colors of {clubName} are {clubColors}. Make 3 suggestions, one for X, one for Facebook and one for Instagram.'
   },
   {
     "id": 2,
