@@ -113,7 +113,7 @@ const contentTypes = [
   {
     id: 8,
     label: 'Bus des Supporters',
-    prompt: 'Annonce la mise en place d\'un bus pour les supporters se rendant au match entre {equipeA} et {equipeB}. Détaille les horaires, le point de départ, et encourage les supporters à réserver leur place pour se rendre au match ensemble. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
+    prompt: 'Annonce la mise en place d\'un bus pour les supporters se rendant au match entre {equipeA} et {equipeB} qui aura lieu au {lieu} le {date} à {heure}. Détaille les horaire et le lieu du match et encourage les supporters à réserver leur place pour se rendre au match ensemble pour soutenir notre équipe {clubName}. Les couleurs du club sont {clubColors} .Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
     id: 9,
@@ -187,7 +187,7 @@ const App: React.FC = () => {
         match.date = lastMatch.date;
         match.equipeA = lastMatch.equipeA;
         match.equipeB = lastMatch.equipeB;
-        match.heure = lastMatch.equipeB;
+        match.heure = lastMatch.heure;
         match.lieu = lastMatch.lieu;
         match.score = lastMatch.score;
         match.type = lastMatch.type;
@@ -250,7 +250,34 @@ const App: React.FC = () => {
       .replace(/{club}/g,fakeDatabase.club.name)
       .replace(/{clubColors}/g,fakeDatabase.club.couleur)
     }
-    
+// bus des supporters    
+    else if(selectedContentType.id === 8){
+//récupérer tous les matchs que le club va disputer dehors
+        const match_out = fakeDatabase.matches.filter(match => 
+          match.type === 'upcoming' && match.equipeA !== fakeDatabase.club.name
+        );
+        const sortedMatches = match_out.sort((a, b) => {
+          const dateA = new Date(a.date.split('/').reverse().join('-')); // Convert to YYYY-MM-DD
+          const dateB = new Date(b.date.split('/').reverse().join('-'));
+          return dateA.getTime() - dateB.getTime(); 
+        });
+        //console.log("sorted_match",sortedMatches);
+// récupérer le plus proche match 
+        let first_match = sortedMatches[0]
+        if(match){
+          match.date = first_match.date;
+          match.equipeA = first_match.equipeA;
+          match.equipeB = first_match.equipeB;
+          match.heure = first_match.heure;
+          match.lieu = first_match.lieu;
+          match.score = first_match.score;
+          match.type = first_match.type;
+          match.league = first_match.league;
+          match.stat = first_match.stat;
+          match.events = first_match.events;
+        }
+    }
+
     if (match) {
       let classment: any[] = [];
       // récupérer la ligue du match pour pouvoir récupérer le classement plus tard
