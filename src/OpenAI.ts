@@ -7,8 +7,10 @@ export const generateText = async (prompt: string): Promise<string> => {
             'https://api.openai.com/v1/chat/completions',
             {
                 model: 'gpt-3.5-turbo', // Utiliser le modèle gpt-3.5-turbo
-                messages: [{ role: 'user', content: prompt }], // Structure des messages
-                max_tokens: 2000,
+                messages: [
+                    {role:"system",content:"Answer in French"},
+                    { role: 'user', content: prompt }], // Structure des messages
+                max_tokens: 1000,
                 temperature: 0.7
             },
             {

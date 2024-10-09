@@ -78,12 +78,12 @@ const contentTypes = [
   {
     id: 1,
     label: 'Annonce Match',
-    prompt: 'En tant que responsable de la communication de {clubName}, rédige une annonce passionnante pour le match à venir entre {equipeA} et {equipeB}. Mentionne le lieu à {lieu} à {heure} le {date}, et utilise un ton engageant pour motiver les supporters à venir encourager leur équipe. Prends en compte la position de {equipeA} est en {positionA} position avec {pointsA} et {equipeB}, qui est en {positionB} position avec {pointsB} points. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
+    prompt: 'As a community manager for {clubName}, write an exciting announcement for the upcoming match between {teamA} and {teamB}. Mention the location at {lieu} at {heure} on {date}, and use an engaging tone to motivate fans to come and cheer on their team. Consider the position of {equipeA} is in {positionA} position with {pointsA} and {equipeB}, which is in {positionB} position with {pointsB} points. A victory is worth 3 points, a draw 1 point and a defeat 0 points. The colors of {clubName} are {clubColors}. Make 3 suggestions, one for X, one for Facebook and one for Instagram.'
   },
   {
     "id": 2,
     "label": "Score en Direct",
-    "prompt": "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram."
+    "prompt": "As communications manager for {clubName}, write a powerful message based on the outcome of the match for {clubName} to announce the live score of the match between {equipeA} and {equipeB}. Currently the score is {score}. {clubName} {matchStatus}. Also mentions the last goal scored: {lastGoal}. Highlight the position of {equipeA}, which is in {positionA} position with {pointsA} points, and {equipeB}, which is in {positionB} position with {pointsB} points. Use an energetic tone to captivate the audience! Adapts the text based on whether {clubName} is winning or losing. A victory is worth 3 points, a draw 1 point and a defeat 0 points. The colors of {clubName} are {clubColors}. Make 3 suggestions, one for X, one for Facebook and one for Instagram."
   },
   {
     id: 3,
@@ -98,7 +98,7 @@ const contentTypes = [
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Affiche le programme détaillé de ce mois-ci en affichant tous les matchs de la liste ci-après : {matchs} de {clubName}. Inclue les dates, les heures et les équipes adverses tout en ajoutant un commentaire engageant pour les matchs à venir afin d’inciter les supporters à y assister. Les couleurs du club sont {clubColors} ' 
+    prompt: 'Create a detailed schedule for this month showing all of {club}\'s matches. Include dates, times and opposing teams, while adding engaging commentary for each subsequent match to entice fans to attend: {matchs}. Club colors are {clubColors}' 
   },
   {
     id: 6,
@@ -118,12 +118,12 @@ const contentTypes = [
   {
     id: 9,
     label: 'Débrief du Match',
-    prompt: 'En tant que responsable de la communication de {clubName},rédige un débrief complet du dernier match {equipeA} contre {equipeB} avec un score de {score}. Discute du classement de {clubName} avec les statistiques ci-après: le classement est comme suit {equipeA} est à la {positionA} avec {pointsA} points position et {equipeB} est à la {positionB} avec {pointsB} points . Inclue des statistiques clés dans {statistiques}, les évènements {events} du match  et des commentaires sur les performances des joueurs. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram. '
+    prompt: 'As a community manager for {clubName}, write a complete debrief of the last match {equipeA} against {equipeB} with a score of {score}. Discusses the ranking of {clubName} with the following statistics: the ranking is as follows {equipeA} is at {positionA} with {pointsA} points position and {equipeB} is at {positionB} with {pointsB} points. Includes key statistics in {statistiques}, match events {events} and comments on player performances. Club colors are {clubColors}. Make 3 debriefs of this game, one for X, one for Facebook and one for Instagram. '
   },
   {
     id: 10,
     label: 'Classement',
-    prompt: 'En tant que responsable de la communication de {club}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras les classements de toutes les ligues où {club} participe dans chaque message.'
+    prompt: 'As a community manager for {club}, write an informative message about its current ranking: {classement}. Club colors are {clubColors}. Make 3 proposals, one for X, one for Facebook and one for Instagram in which you will integrate the rankings of all the leagues where {club} participates in each message.'
   }
 ];
 
@@ -213,7 +213,7 @@ const App: React.FC = () => {
       //console.log("ranking",club_classmnt);
       
       for (let c of club_classmnt){
-        let r = String("Dans la "+fakeDatabase.league.get(Number(c.league))+",l'équipe "+c.equipe+ " est à la "+c.position+" avec "+c.points+"\n")
+        let r = String("In the "+fakeDatabase.league.get(Number(c.league))+",the team "+c.equipe+ " is in "+c.position+"th with "+c.points+" points\n")
         repr_class+= r;
       }
 // dans le cas où on veut afficher le classement
@@ -241,7 +241,7 @@ const App: React.FC = () => {
       console.log("match_sorted",match_sorted)
       for (let match of match_sorted){
          let club_league= fakeDatabase.league.get(Number(match.league));
-         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu);
+         let r_match = String("TeamA:"+match.equipeA+"\nTeamB:"+match.equipeB+"\nDate:"+match.date+"\nHour:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu);
          if (match.type == "past") r_match += String("\nScore:"+match.score+"\n\n");
          info_match += r_match;
       }
@@ -283,10 +283,10 @@ const App: React.FC = () => {
       if (lastGoalEvent) {
         if (lastGoalEvent.includes(match.club)) {
           // Si le but est marqué par le club d'Avion Futsal
-          goalAnnouncement = `⚽️ GOOOAAALLLL pour ${match.club} ! ${lastGoalEvent}`;
+          goalAnnouncement = `⚽️ GOOOAAALLLL for ${match.club} ! ${lastGoalEvent}`;
         } else {
           // Si le but est marqué par l'équipe adverse
-          goalAnnouncement = `⚽️ Aïe... But pour ${match.equipeB} ! ${lastGoalEvent}`;
+          goalAnnouncement = `⚽️ Aïe... goal for ${match.equipeB} ! ${lastGoalEvent}`;
         }
       }
       console.log(goalAnnouncement);
@@ -294,11 +294,11 @@ const App: React.FC = () => {
       // Adaptation du prompt en fonction de qui gagne
       let matchStatus = '';
       if (clubScore > opponentScore) {
-        matchStatus = 'est actuellement en train de gagner !';
+        matchStatus = 'is actually winning !';
       } else if (clubScore < opponentScore) {
-        matchStatus = 'est actuellement en train de perdre...';
+        matchStatus = 'is actually losing...';
       } else {
-        matchStatus = 'est à égalité.';
+        matchStatus = 'is tied.';
       }
       // recupérer les positions des deux équipes
       let positions: Record<string, string> = {}
@@ -465,7 +465,7 @@ const App: React.FC = () => {
         // Liaison de tous les évènements dans une seule chaîne de caractère
         let evenement_str = ""
         for (let elt of evts) {
-          let str = String("Le joueur " + elt.player + " de l'équipe " + elt.team + " a fait un " + elt.type + " à la " + elt.time + "ème de minutes.")
+          let str = String("The player " + elt.player + " of the team " + elt.team + " has done " + elt.type + " in the " + elt.time + "th minutes.")
           evenement_str += str;
         }
         let stat = fixtureData.response[0].statistics;
@@ -475,10 +475,10 @@ const App: React.FC = () => {
         let stats = [];
         if (stat.length > 0) {
           for (let s of stat) {
-            let repr = String("La statistique de l'équipe " + s.team.name + " pendant le match:\n ")
+            let repr = String("The statistics of the team " + s.team.name + " during the game:\n ")
             if (s.statistics.length > 0) {
               for (let sta of s.statistics) {
-                repr += String(sta.type + " a pour valeur " + String(sta.value) + "\n")
+                repr += String(sta.type + " has the value " + String(sta.value) + "\n")
               }
             }
             resume_stat += repr;
