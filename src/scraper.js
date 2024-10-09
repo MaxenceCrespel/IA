@@ -59,12 +59,33 @@ async function getClassement() {
   return { classementGeneral, classementGlobal }; // Retourne les deux classements
 }
 
+
+function fusionnerClassements(classementGeneral, classementGlobal) {
+  return classementGlobal.map((globalTeam, index) => {
+    const generalTeam = classementGeneral[index];
+    return {
+      position: globalTeam.position,
+      equipe: globalTeam.equipe,
+      url: globalTeam.url,
+      points: generalTeam.points,
+      jeux: generalTeam.jeux,
+      gagnés: generalTeam.gagnés,
+      nuls: generalTeam.nuls,
+      perdus: generalTeam.perdus,
+      p: generalTeam.p,
+      c: generalTeam.c,
+      diff: generalTeam.diff
+    };
+  });
+}
+
 app.get('/classement', async (req, res) => {
   console.log('Requête reçue sur /classement'); // Indique qu'une requête a été reçue
   try {
     const classement = await getClassement();
-    res.json(classement);
-    console.log('Réponse envoyée :', classement); // Affiche la réponse envoyée
+    const classementCombine = fusionnerClassements(classement.classementGeneral, classement.classementGlobal);
+    res.json(classementCombine);
+    console.log('Réponse envoyée :', classementCombine);
   } catch (error) {
     console.error('Erreur lors du scraping :', error); // Affiche l'erreur en cas de problème
     res.status(500).send('Erreur lors du scraping');

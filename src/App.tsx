@@ -10,7 +10,7 @@ import {
 } from 'react-share';
 import axios from 'axios';
 import { useEffect } from 'react';
-
+import { QRCodeCanvas } from 'qrcode.react';
 const fakeDatabase = {
   matches: [
     {
@@ -477,10 +477,12 @@ const App: React.FC = () => {
 
   // Utilisation d'un autre useEffect pour afficher le classement une fois mis à jour
   useEffect(() => {
-    if (classement && classement.classementGlobal) {
-      console.log("classementGlobal: ", classement.classementGlobal);
+    if (classement) {
+      console.log(classement);
     }
   }, [classement]);
+
+  const qrCodeUrl = 'https://app.sfeira.com/abonnement/1727162185';
 
   return (
     <div style={{ padding: '20px' }}>
@@ -506,10 +508,10 @@ const App: React.FC = () => {
         </select>
       </div>
 
-      <div style={{ marginTop: '20px' }}>
+      {/* <div style={{ marginTop: '20px' }}>
         <label htmlFor="image-upload">Ajouter une image :</label>
         <input type="file" id="image-upload" onChange={handleImageUpload} />
-      </div>
+      </div> */}
 
       <button onClick={handleGenerateText} disabled={loading} style={{ marginTop: '20px' }}>
         {loading ? 'Génération en cours...' : 'Générer le texte'}
@@ -522,13 +524,14 @@ const App: React.FC = () => {
         <div style={{ whiteSpace: 'pre-line' }}>
           {text}
         </div>
-        {imagePreview && (
+        {/* {imagePreview && (
           <div style={{ marginTop: '10px' }}>
             <h3>Image incluse :</h3>
             <img src={imagePreview} alt="Image pour le partage" style={{ maxWidth: '100%', height: 'auto' }} />
           </div>
-        )}
+        )} */}
       </div>
+      <QRCodeCanvas value={qrCodeUrl} size={256} level={"H"} />
 
       <h2>Classement Futsal National D1</h2>
 
@@ -548,21 +551,19 @@ const App: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {classement && classement.classementGlobal.map((equipe: any, index: any) => {
-            // Trouvez l'équipe correspondante dans le classement général
-            const equipeGenerale = classement.classementGeneral[index]; // Assurez-vous que l'index est correct
+          {classement && classement.map((equipe: any, index: any) => {
             return (
               <tr key={index}>
-                <td className="text-center">{equipe.position ?? 'N/A'}</td>
-                <td className="text-center">{equipe.equipe ?? 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.points : 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.jeux : 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.gagnés : 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.nuls : 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.perdus : 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.p : 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.c : 'N/A'}</td>
-                <td className="text-center">{equipeGenerale ? equipeGenerale.diff : 'N/A'}</td>
+                <td className="text-center">{equipe.position}</td>
+                <td className="text-center">{equipe.equipe}</td>
+                <td className="text-center">{equipe.points}</td>
+                <td className="text-center">{equipe.jeux}</td>
+                <td className="text-center">{equipe.gagnés}</td>
+                <td className="text-center">{equipe.nuls}</td>
+                <td className="text-center">{equipe.perdus}</td>
+                <td className="text-center">{equipe.p}</td>
+                <td className="text-center">{equipe.c}</td>
+                <td className="text-center">{equipe.diff}</td>
               </tr>
             );
           })}
