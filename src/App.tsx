@@ -81,9 +81,9 @@ const contentTypes = [
     prompt: 'En tant que responsable de la communication de {clubName}, rédige une annonce passionnante pour le match à venir entre {equipeA} et {equipeB}. Mentionne le lieu à {lieu} à {heure} le {date}, et utilise un ton engageant pour motiver les supporters à venir encourager leur équipe. Prends en compte la position de {equipeA} est en {positionA} position avec {pointsA} et {equipeB}, qui est en {positionB} position avec {pointsB} points. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram.'
   },
   {
-    "id": 2,
-    "label": "Score en Direct",
-    "prompt": "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram."
+    id: 2,
+    label: "Score en Direct",
+    prompt: "En tant que responsable de la communication de {clubName}, écris un message percutant en fonction de la tournure du match pour {clubName} afin d'annoncer le score en direct du match entre {equipeA} et {equipeB}. Actuellement, le score est de {score}. {clubName} {matchStatus}. Mentionne également le dernier but marqué : {lastGoal}. Mets en avant la position de {equipeA}, qui est en {positionA} position avec {pointsA} points, et {equipeB}, qui est en {positionB} position avec {pointsB} points. Utilise un ton énergique pour captiver l'auditoire ! Adapte le texte en fonction de si {clubName} est en train de gagner ou de perdre. Une victoire vaut 3 points, un match nul 1 point et une défaite 0 points. Les couleurs de {clubName} sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram."
   },
   {
     id: 3,
@@ -98,7 +98,7 @@ const contentTypes = [
   {
     id: 5,
     label: 'Programme du Mois',
-    prompt: 'Affiche le programme détaillé de ce mois-ci en affichant tous les matchs de la liste ci-après : {matchs} de {clubName}. Inclue les dates, les heures et les équipes adverses tout en ajoutant un commentaire engageant pour les matchs à venir afin d’inciter les supporters à y assister. Les couleurs du club sont {clubColors} ' 
+    prompt: 'Affiche le programme détaillé de ce mois-ci en affichant tous les matchs de la liste ci-après : {matchs} de {clubName}. Inclue les dates, les heures et les équipes adverses tout en ajoutant un commentaire engageant pour les matchs à venir afin d’inciter les supporters à y assister. Les couleurs du club sont {clubColors} '
   },
   {
     id: 6,
@@ -123,7 +123,7 @@ const contentTypes = [
   {
     id: 10,
     label: 'Classement',
-    prompt: 'En tant que responsable de la communication de {club}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras les classements de toutes les ligues où {club} participe dans chaque message.'
+    prompt: 'En tant que responsable de la communication de {clubName}, Écris un message informatif sur son classement actuel: {classement}. Les couleurs du club sont {clubColors}. Fais 3 propositions, une pour X, une pour Facebook et une pour instagram dans lesquelles tu intègreras les classements de toutes les ligues où {club} participe dans chaque message.'
   }
 ];
 
@@ -168,10 +168,10 @@ const App: React.FC = () => {
       if (selectedContentType.id === 9) return m.type === 'past';
       return false;
     });
-// chaîne pour représenter le classement du club
-    let repr_class  = "";
-    if(selectedContentType.id === 9){
-// select all the match past and sort it by 
+    // chaîne pour représenter le classement du club
+    let repr_class = "";
+    if (selectedContentType.id === 9) {
+      // select all the match past and sort it by 
       console.log("Debrief du match")
 
       let matches = fakeDatabase.matches.filter(elt => elt.type === "past").sort((a, b) => {
@@ -195,60 +195,60 @@ const App: React.FC = () => {
         match.stat = lastMatch.stat;
         match.events = lastMatch.events;
       }
-      console.log("last_match",lastMatch);
-      console.log("match",match);
+      console.log("last_match", lastMatch);
+      console.log("match", match);
     }
-// récupérer le classement
-    else if(selectedContentType.id === 10){
+    // récupérer le classement
+    else if (selectedContentType.id === 10) {
       //console.log("classement dans le fake:",fakeDatabase.classement);
-      let club_classmnt:any[] = [];
-      for (let elt in fakeDatabase.classement){
-        if(fakeDatabase.classement[elt].length > 0){
-           //let classmnts = fakeDatabase.classement[elt];
-           for (let rang of fakeDatabase.classement[elt]){
-              if(rang.equipe === fakeDatabase.club.name) club_classmnt.push(rang);
-           }
-        } 
+      let club_classmnt: any[] = [];
+      for (let elt in fakeDatabase.classement) {
+        if (fakeDatabase.classement[elt].length > 0) {
+          //let classmnts = fakeDatabase.classement[elt];
+          for (let rang of fakeDatabase.classement[elt]) {
+            if (rang.equipe === fakeDatabase.club.name) club_classmnt.push(rang);
+          }
+        }
       }
       //console.log("ranking",club_classmnt);
-      
-      for (let c of club_classmnt){
-        let r = String("Dans la "+fakeDatabase.league.get(Number(c.league))+",l'équipe "+c.equipe+ " est à la "+c.position+" avec "+c.points+"\n")
-        repr_class+= r;
+
+      for (let c of club_classmnt) {
+        let r = String("Dans la " + fakeDatabase.league.get(Number(c.league)) + ",l'équipe " + c.equipe + " est à la " + c.position + " avec " + c.points + "\n")
+        repr_class += r;
       }
-// dans le cas où on veut afficher le classement
+      // dans le cas où on veut afficher le classement
       prompt = prompt
-      .replace(/{classement}/g,repr_class)
-      .replace(/{club}/g,fakeDatabase.club.name)
-      .replace(/clubColors/g, fakeDatabase.club.couleur)
+        .replace(/{classement}/g, repr_class)
+        .replace(/{club}/g, fakeDatabase.club.name)
+        .replace(/{clubColors}/g, fakeDatabase.club.couleur)
     }
-// affichage du programme du mois
-    else if(selectedContentType.id === 5){
-// récupérer le mois actuel
-      let month = new Date().getMonth() ;
-// récupérer les matchs du club pour ce mois-ci
+    // affichage du programme du mois
+    else if (selectedContentType.id === 5) {
+      // récupérer le mois actuel
+      let month = new Date().getMonth();
+      // récupérer les matchs du club pour ce mois-ci
       let matchs: any[] = [];
-      for (let match of fakeDatabase.matches){
-          if (parseDateDDMMYYYY(match.date).getMonth() == month && match.club == fakeDatabase.club.name)
-             matchs.push(match);
+      for (let match of fakeDatabase.matches) {
+        if (parseDateDDMMYYYY(match.date).getMonth() == month && match.club == fakeDatabase.club.name)
+          matchs.push(match);
       }
       let info_match = "";
-      let match_sorted = matchs.sort((a,b) => {
+      let match_sorted = matchs.sort((a, b) => {
         const dateA = new Date(a.date.split('/').reverse().join('-')); // Convert to YYYY-MM-DD
         const dateB = new Date(b.date.split('/').reverse().join('-'));
         return dateA.getTime() - dateB.getTime();
       });
-      console.log("match_sorted",match_sorted)
-      for (let match of match_sorted){
-         let club_league= fakeDatabase.league.get(Number(match.league));
-         let r_match = String("EquipeA:"+match.equipeA+"\nEquipeB:"+match.equipeB+"\nDate:"+match.date+"\nHeure:"+match.heure+"\nLigue:"+club_league+"\nLieu:"+match.lieu);
-         if (match.type == "past") r_match += String("\nScore:"+match.score+"\n\n");
-         info_match += r_match;
+      console.log("match_sorted", match_sorted)
+      for (let match of match_sorted) {
+        let club_league = fakeDatabase.league.get(Number(match.league));
+        let r_match = String("EquipeA:" + match.equipeA + "\nEquipeB:" + match.equipeB + "\nDate:" + match.date + "\nHeure:" + match.heure + "\nLigue:" + club_league + "\nLieu:" + match.lieu);
+        if (match.type == "past") r_match += String("\nScore:" + match.score + "\n\n");
+        info_match += r_match;
       }
       prompt = prompt
-      .replace(/{matchs}/g,info_match)
-      .replace(/{club}/g,fakeDatabase.club.name)
-      .replace(/{clubColors}/g,fakeDatabase.club.couleur)
+        .replace(/{matchs}/g, info_match)
+        .replace(/{club}/g, fakeDatabase.club.name)
+        .replace(/{clubColors}/g, fakeDatabase.club.couleur)
     }
 // bus des supporters    
     else if(selectedContentType.id === 8){
@@ -531,7 +531,7 @@ const App: React.FC = () => {
       }
       fakeDatabase.matches = data;
       //console.log("fakedatabase_sortie",fakeDatabase.matches);
-      let classes:any[] = [];
+      let classes: any[] = [];
       const leagues = Array.from(fakeDatabase.league.entries());
       //console.log("leagues_array",leagues)
       for (const value of leagues) {
